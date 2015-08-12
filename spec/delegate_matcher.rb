@@ -35,14 +35,6 @@ RSpec::Matchers.define :delegate do |method|
     "delegate #{@method} to its #{@to}#{@prefix ? " with prefix #{@prefix}" : ''}"
   end
 
-  failure_message do |text|
-    "expected #{@delegator} to #{description}"
-  end
-
-  failure_message_when_negated do |text|
-    "expected #{@delegator} not to #{description}"
-  end
-
   chain(:to)          { |receiver|   @to = receiver }
   chain(:with_prefix) { |prefix=nil| @prefix = prefix || @to.to_s.sub(/@/, '') }
 
