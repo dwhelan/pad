@@ -1,7 +1,14 @@
 require 'rspec'
-require 'pad'
 # require 'rspec/its'
-#require 'coveralls'
+# require 'coveralls'
+
+require 'simplecov'
+
+# SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+#     SimpleCov::Formatter::HTMLFormatter,
+#     Coveralls::SimpleCov::Formatter
+# ]
+SimpleCov.start
 
 #require 'pry'
 #require 'awesome_print'
@@ -9,6 +16,7 @@ require 'pad'
 # I18n.enforce_available_locales = true
 # Coveralls.wear!
 
+require 'pad'
 require_relative 'shared/entity_module'
 
 RSpec.configure do |config|

@@ -2,12 +2,6 @@ require 'spec_helper'
 # require 'shoulda/matchers/independent/delegate_method_matcher'
 require 'shoulda/matchers'
 
-class String
-  def squish
-    self
-  end
-end
-
 module Pad
   describe Virtus do
 
