@@ -38,7 +38,7 @@ RSpec::Matchers.define :delegate do |method|
   end
 
   chain(:to)          { |receiver|   @to = receiver }
-  chain(:with_prefix) { |prefix=nil| @prefix = prefix || @to }
+  chain(:with_prefix) { |prefix=nil| @prefix = prefix || @to.to_s.sub(/@/, '') }
 
   private
 

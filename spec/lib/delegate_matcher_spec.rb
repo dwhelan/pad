@@ -24,6 +24,16 @@ describe 'Delegate matcher' do
         end
         expect(post).to delegate(:name).to(:@author)
       end
+
+      it 'with unspecified prefix should call method with prefix of delegate name' do
+        post.class.class_eval do
+          def author_name
+            @author.name
+          end
+        end
+        expect(post).to delegate(:name).to(:@author).with_prefix
+      end
+
     end
 
     context 'to method' do
