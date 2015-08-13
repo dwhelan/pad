@@ -1,28 +1,25 @@
 # RSpec matcher to spec delegations.
 # Based on https://gist.github.com/awinograd/6158961
-# Forked from https://gist.github.com/ssimeonov/5942729 with fixes
-# for arity + custom prefix.
 #
 # Usage:
 #
 #     describe Post do
-#       it { should delegate(:name).to(:author) }                       # name         => author.name
+#       it { should delegate(:name).to(:author)   }                     # name         => author.name
+#       it { should delegate(:name).to('author')  }                     # name         => author.name
+#       it { should delegate(:name).to(:@author)  }                     # name         => @author.name
+#       it { should delegate(:name).to('@author') }                     # name         => @author.name
+#
 #       it { should delegate(:name).to(:author).with_prefix }           # author_name  => author.name
 #       it { should delegate(:name).to(:author).with_prefix(:writer) }  # writer_name  => author.name
+#       it { should delegate(:name).to(:author).with_prefix('writer') } # writer_name  => author.name
 #
-#       it { should delegate(:name).to(:@author) }                      # name         => @author.name
-#       it { should delegate(:name).to(:@author).with_prefix }          # author_name  => @author.name
-#       it { should delegate(:name).to(:@author).with_prefix(:writer) } # writer_name  => @author.name
-#
+#       it { should delegate(:name).to(:author).via(:writer) }          # writer       => author.name
 #       it { should delegate(:name).to(:author).via('writer') }         # writer       => author.name
-#
-#       it { should delegate(:month).to(:created_at) }
-#       it { should delegate(:year).to(:created_at) }
-#       it { should delegate(:something).to(:'@instance_var') }
 #     end
 RSpec::Matchers.define :delegate do |method|
   match do |delegator|
     raise 'cannot specify delegate using "with_prefix" and "via"' if @prefix && @delegator_method
+    raise 'need to provide a "to"' unless @delegate
 
     @method    = method
     @delegator = delegator
@@ -35,7 +32,16 @@ RSpec::Matchers.define :delegate do |method|
   end
 
   description do
-    "delegate #{method} to its #{delegate}#{@prefix ? " with prefix #{@prefix}" : ''}"
+    mechanism = case
+                  when @delegator_method
+                    " via #{@delegator_method}"
+                  when @prefix
+                    " with prefix #{@prefix}"
+                  else
+                    ''
+                end
+
+    "delegate #{method} to its #{delegate}#{mechanism}"
   end
 
   chain(:to)          { |receiver|   @delegate         = receiver }
@@ -74,8 +80,8 @@ RSpec::Matchers.define :delegate do |method|
   end
 
   def delegate_double
-    double('receiver').tap do |receiver|
-      allow(receiver).to receive(method) { :called }
+    double('delegate').tap do |delegate|
+      allow(delegate).to receive(method) { :called }
     end
   end
 end

@@ -25,6 +25,9 @@ describe 'Delegate matcher' do
       def author_with_salutation(salutation)
       end
 
+      def age
+      end
+
     end.new
   end
 
@@ -33,6 +36,51 @@ describe 'Delegate matcher' do
       def name
       end
     end.new
+  end
+
+  subject { post }
+
+  describe 'delegation' do
+    it { should delegate(:name).to(:author)   }
+    it { should delegate(:name).to('author')  }
+    it { should delegate(:name).to(:@author)  }
+    it { should delegate(:name).to('@author') }
+
+    it { should_not delegate(:age).to(:author) }
+
+    it { should delegate(:name).to(:author).with_prefix           }
+    it { should delegate(:name).to(:author).with_prefix(:writer)  }
+    it { should delegate(:name).to(:author).with_prefix('writer') }
+
+    it { should delegate(:name).to(:author).via(:writer)   }
+    it { should delegate(:name).to(:author).via('writer')  }
+    it { should delegate(:name).to(:@author).via('writer') }
+  end
+
+  describe 'should raise error' do
+    it 'with "to" not specifieid' do
+      expect { should delegate(:name) }.to raise_error do |error|
+        expect(error.message).to match /need to provide a "to"/
+      end
+    end
+
+    it 'with an invalid "to"' do
+      expect { should delegate(:name).to(:invalid_delegate) }.to raise_error do |error|
+        expect(error.message).to match /does not respond to invalid_delegate/
+      end
+    end
+
+    it 'with both "prefix" and "via"' do
+      expect { should delegate(:name).to(:author).with_prefix().via('writer') }.to raise_error do |error|
+        expect(error.message).to match /cannot specify delegate using "with_prefix" and "via"/
+      end
+    end
+
+    it 'with arg defined for method' do
+      expect { should delegate(:name).to(:author_with_salutation) }.to raise_error do |error|
+        expect(error.message).to match /author_with_salutation method does not have zero or -1 arity/
+      end
+    end
   end
 
   describe 'messages' do
@@ -63,47 +111,11 @@ describe 'Delegate matcher' do
       its(:failure_message)              { should match /expected .* to delegate name to its author with prefix writer/ }
       its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author with prefix writer/ }
     end
-  end
 
-  it 'with no prefix should call same method' do
-    expect(post).to delegate(:name).to(:author)
-    expect(post).to delegate(:name).to('author')
-    expect(post).to delegate(:name).to(:@author)
-    expect(post).to delegate(:name).to('@author')
-  end
-
-  it 'with unspecified prefix should call method with prefix of delegate name' do
-    expect(post).to delegate(:name).to(:author).with_prefix
-    expect(post).to delegate(:name).to(:@author).with_prefix
-  end
-
-  it 'with specified prefix should call method with prefix ' do
-    expect(post).to delegate(:name).to(:author).with_prefix(:writer)
-    expect(post).to delegate(:name).to(:author).with_prefix('writer')
-    expect(post).to delegate(:name).to(:@author).with_prefix(:writer)
-  end
-
-  it 'with "via" should call "via" method on delegator' do
-    expect(post).to delegate(:name).to(:author).via(:writer)
-    expect(post).to delegate(:name).to(:author).via('writer')
-    expect(post).to delegate(:name).to(:@author).via('writer')
-  end
-
-  it 'with an invalid "to" should raise' do
-    expect { expect(post).to delegate(:name).to(:invalid_delegate) }.to raise_error do |exception|
-      expect(exception.message).to match /does not respond to invalid_delegate/
-    end
-  end
-
-  it 'with both "prefix" and "via" should raise' do
-    expect { expect(post).to delegate(:name).to(:author).with_prefix().via('writer') }.to raise_error do |exception|
-      expect(exception.message).to match /cannot specify delegate using "with_prefix" and "via"/
-    end
-  end
-
-  it 'with arg defined for method should raise' do
-    expect { expect(post).to delegate(:name).to(:author_with_salutation) }.to raise_error do |exception|
-      expect(exception.message).to match /author_with_salutation method does not have zero or -1 arity/
+    context('delegate(:name).to(:author).via("writer")') do
+      its(:description)                  { should eq 'delegate name to its author via writer' }
+      its(:failure_message)              { should match /expected .* to delegate name to its author via writer/ }
+      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author via writer/ }
     end
   end
 end
