@@ -91,9 +91,15 @@ describe 'Delegate matcher' do
       end
     end
 
-    it 'with argument count mismatch' do
+    it 'with delegate that requires arguments' do
       expect { should delegate(:name).to(:name_with_salutation) }.to raise_error do |error|
         expect(error.message).to match /name_with_salutation method does not have zero or -1 arity/
+      end
+    end
+
+    it 'with delegate method argument mismatch' do
+      expect { should delegate(:name_with_salutation).to(:author) }.to raise_error do |error|
+        expect(error.message).to match /wrong number of arguments/
       end
     end
   end
