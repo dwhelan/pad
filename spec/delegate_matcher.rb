@@ -20,6 +20,8 @@
 #     end
 RSpec::Matchers.define :delegate do |method|
   match do |delegator|
+    raise 'cannot specify delegate using "with_prefix" and "via"' if @prefix && @via
+
     @method = method
     @delegator = delegator
     @delegator_method = @prefix ? :"#{@prefix}_#{method}" : method
@@ -35,7 +37,8 @@ RSpec::Matchers.define :delegate do |method|
     "delegate #{@method} to its #{@to}#{@prefix ? " with prefix #{@prefix}" : ''}"
   end
 
-  chain(:to)          { |receiver|   @to = receiver }
+  chain(:to)          { |receiver|   @to     = receiver }
+  chain(:via)         { |via|        @via    = via }
   chain(:with_prefix) { |prefix=nil| @prefix = prefix || @to.to_s.sub(/@/, '') }
 
   private
@@ -44,12 +47,16 @@ RSpec::Matchers.define :delegate do |method|
     @to.to_s[0] == '@'
   end
 
+  def delegator_method
+    @via || (@prefix ? :"#{@prefix}_#{@method}" : @method)
+  end
+
   def delegate_to_attribute(method)
     original_to = @delegator.instance_variable_get(@to)
 
     begin
       @delegator.instance_variable_set(@to, delegate_double(method))
-      @delegator.send(@delegator_method) == :called
+      @delegator.send(delegator_method) == :called
     ensure
       @delegator.instance_variable_set(@to, original_to)
     end
@@ -63,7 +70,7 @@ RSpec::Matchers.define :delegate do |method|
     end
 
     @delegator.stub(@to).and_return delegate_double(method)
-    @delegator.send(@delegator_method) == :called
+    @delegator.send(delegator_method) == :called
   end
 
   def delegate_double(method)

@@ -14,6 +14,10 @@ describe 'Delegate matcher' do
         author.name
       end
 
+      def writer
+        author.name
+      end
+
       def writer_name
         author.name
       end
@@ -76,9 +80,20 @@ describe 'Delegate matcher' do
     expect(post).to delegate(:name).to(:@author).with_prefix(:writer)
   end
 
+  it 'with "via" should call "via" method on delegator' do
+    expect(post).to delegate(:name).to(:author).via('writer')
+    expect(post).to delegate(:name).to(:@author).via('writer')
+  end
+
   it 'with an invalid "to" should raise' do
     expect { expect(post).to delegate(:name).to(:invalid_delegate) }.to raise_error do |exception|
       expect(exception.message).to match /does not respond to invalid_delegate/
+    end
+  end
+
+  it 'with both "prefix" and "via" should raise' do
+    expect { expect(post).to delegate(:name).to(:author).with_prefix().via('writer') }.to raise_error do |exception|
+      expect(exception.message).to match /cannot specify delegate using "with_prefix" and "via"/
     end
   end
 
