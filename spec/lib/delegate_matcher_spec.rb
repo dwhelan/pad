@@ -22,7 +22,8 @@ describe 'Delegate matcher' do
         author.name
       end
 
-      def author_with_salutation(salutation)
+      def name_with_salutation(salutation)
+        author.name_with_salutation(salutation)
       end
 
       def age
@@ -34,6 +35,9 @@ describe 'Delegate matcher' do
   let(:author) do
     Class.new do
       def name
+      end
+
+      def name_with_salutation(salutation)
       end
     end.new
   end
@@ -55,7 +59,10 @@ describe 'Delegate matcher' do
 
     it { should delegate(:name).to(:author).via(:writer)   }
     it { should delegate(:name).to(:author).via('writer')  }
-    it { should delegate(:name).to(:@author).via('writer') }
+  end
+
+  describe 'foo' do
+    it { should delegate(:name_with_salutation).to(:author).with('Ms.')   }
   end
 
   describe 'should raise error' do
@@ -77,9 +84,9 @@ describe 'Delegate matcher' do
       end
     end
 
-    it 'with arg defined for method' do
-      expect { should delegate(:name).to(:author_with_salutation) }.to raise_error do |error|
-        expect(error.message).to match /author_with_salutation method does not have zero or -1 arity/
+    it 'with argument count mismatch' do
+      expect { should delegate(:name).to(:name_with_salutation) }.to raise_error do |error|
+        expect(error.message).to match /name_with_salutation method does not have zero or -1 arity/
       end
     end
   end
@@ -117,6 +124,12 @@ describe 'Delegate matcher' do
       its(:description)                  { should eq 'delegate name to its author via writer' }
       its(:failure_message)              { should match /expected .* to delegate name to its author via writer/ }
       its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author via writer/ }
+    end
+
+    context('delegate(:name_with_salutation).to(:author).with("Ms.")') do
+      its(:description)                  { should eq 'delegate name_with_salutation with arguments Ms. to its author' }
+      its(:failure_message)              { should match /expected .* to delegate name_with_salutation with arguments Ms. to its author/ }
+      its(:failure_message_when_negated) { should match /expected .* not to delegate name_with_salutation with arguments Ms. to its author/ }
     end
   end
 end

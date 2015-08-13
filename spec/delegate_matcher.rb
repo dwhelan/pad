@@ -22,13 +22,14 @@ RSpec::Matchers.define(:delegate) do |method|
     @delegator = delegator
 
     if delegate_is_an_attribute?
-      delegate_to_attribute
+      delegate_to_attribute?
     else
-      delegate_to_method
+      delegate_to_method?
     end
   end
 
   description do
+    arguments = args ? " with arguments #{args}" : ''
     mechanism = case
                   when @delegator_method
                     " via #{@delegator_method}"
@@ -38,16 +39,17 @@ RSpec::Matchers.define(:delegate) do |method|
                     ''
                 end
 
-    "delegate #{method} to its #{delegate}#{mechanism}"
+    "delegate #{method}#{arguments} to its #{delegate}#{mechanism}"
   end
 
-  chain(:to) { |receiver| @delegate = receiver }
-  chain(:via) { |via| @delegator_method = via }
-  chain(:with_prefix) { |prefix=nil| @prefix = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:to)          { |receiver|   @delegate         = receiver }
+  chain(:via)         { |via|        @delegator_method = via }
+  chain(:with_prefix) { |prefix=nil| @prefix           = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:with)        { |args|       @args             = args }
 
   private
 
-  attr_reader :method, :delegator, :delegate, :prefix
+  attr_reader :method, :delegator, :delegate, :prefix, :args
 
   def delegator_method
     @delegator_method || (prefix ? :"#{prefix}_#{method}" : method)
@@ -57,15 +59,15 @@ RSpec::Matchers.define(:delegate) do |method|
     @delegate.to_s[0] == '@'
   end
 
-  def delegate_to_attribute
+  def delegate_to_attribute?
     actual_delegate = delegator.instance_variable_get(delegate)
     delegator.instance_variable_set(delegate, delegate_double)
-    delegator.send(delegator_method) == :called
+    delegate?
   ensure
     delegator.instance_variable_set(delegate, actual_delegate)
   end
 
-  def delegate_to_method
+  def delegate_to_method?
     raise "#{delegator} does not respond to #{delegate}" unless delegator.respond_to?(delegate, true)
 
     unless [0, -1].include?(delegator.method(delegate).arity)
@@ -73,12 +75,24 @@ RSpec::Matchers.define(:delegate) do |method|
     end
 
     allow(delegator).to receive(delegate) { delegate_double }
-    delegator.send(delegator_method) == :called
+    delegate?
+  end
+
+  def delegate?
+    if args
+      delegator.send(delegator_method, args) == :called
+    else
+      delegator.send(delegator_method) == :called
+    end
   end
 
   def delegate_double
     double('delegate').tap do |delegate|
-      allow(delegate).to receive(method) { :called }
+      if args
+        allow(delegate).to receive(method).with(args) { :called }
+      else
+        allow(delegate).to receive(method) { :called }
+      end
     end
   end
 end
