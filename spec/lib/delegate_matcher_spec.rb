@@ -67,7 +67,9 @@ describe 'Delegate matcher' do
 
   it 'with no prefix should call same method' do
     expect(post).to delegate(:name).to(:author)
+    expect(post).to delegate(:name).to('author')
     expect(post).to delegate(:name).to(:@author)
+    expect(post).to delegate(:name).to('@author')
   end
 
   it 'with unspecified prefix should call method with prefix of delegate name' do
@@ -77,10 +79,12 @@ describe 'Delegate matcher' do
 
   it 'with specified prefix should call method with prefix ' do
     expect(post).to delegate(:name).to(:author).with_prefix(:writer)
+    expect(post).to delegate(:name).to(:author).with_prefix('writer')
     expect(post).to delegate(:name).to(:@author).with_prefix(:writer)
   end
 
   it 'with "via" should call "via" method on delegator' do
+    expect(post).to delegate(:name).to(:author).via(:writer)
     expect(post).to delegate(:name).to(:author).via('writer')
     expect(post).to delegate(:name).to(:@author).via('writer')
   end
