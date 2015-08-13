@@ -32,6 +32,7 @@ describe 'Delegate matcher' do
       end
 
       def age
+        60
       end
 
     end.new
@@ -40,17 +41,32 @@ describe 'Delegate matcher' do
   let(:author) do
     Class.new do
       def name
+        'Catherine Asaro'
       end
 
       def name_with_salutation(salutation)
+        "#{salutation} #{name}"
       end
 
       def full_name(salutation, credentials)
+        "#{name_with_salutation(salutation)}, #{credentials}"
       end
     end.new
   end
 
   subject { post }
+  before  { post.author = author }
+
+  describe 'test support' do
+    its(:name)        { should eq 'Catherine Asaro' }
+    its(:author_name) { should eq 'Catherine Asaro' }
+    its(:writer)      { should eq 'Catherine Asaro' }
+    its(:writer_name) { should eq 'Catherine Asaro' }
+    its(:age)         { should eq 60                }
+
+    it { expect(post.name_with_salutation('Ms.')).to eq 'Ms. Catherine Asaro'}
+    it { expect(post.full_name('Ms.', 'Phd')).to     eq 'Ms. Catherine Asaro, Phd'}
+  end
 
   describe 'delegation' do
     it { should delegate(:name).to(:author)   }
