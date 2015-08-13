@@ -29,7 +29,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   description do
-    arguments = args ? " with arguments #{args}" : ''
+    arguments = args ? " with arguments #{args.join ', '}" : ''
     mechanism = case
                   when @delegator_method
                     " via #{@delegator_method}"
@@ -45,7 +45,7 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:to)          { |receiver|   @delegate         = receiver }
   chain(:via)         { |via|        @delegator_method = via }
   chain(:with_prefix) { |prefix=nil| @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)        { |args|       @args             = args }
+  chain(:with)        { |*args|      @args             = args }
 
   private
 
@@ -80,7 +80,7 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def delegate?
     if args
-      delegator.send(delegator_method, args) == :called
+      delegator.send(delegator_method, *args) == :called
     else
       delegator.send(delegator_method) == :called
     end
@@ -88,11 +88,9 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def delegate_double
     double('delegate').tap do |delegate|
-      if args
-        allow(delegate).to receive(method).with(args) { :called }
-      else
-        allow(delegate).to receive(method) { :called }
-      end
+      call = receive(method)
+      call = call.with(*args) if args
+      allow(delegate).to(call) { :called }
     end
   end
 end

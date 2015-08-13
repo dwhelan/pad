@@ -1,3 +1,4 @@
+# noinspection RubyResolve
 require 'spec_helper'
 require 'rspec/its'
 
@@ -26,6 +27,10 @@ describe 'Delegate matcher' do
         author.name_with_salutation(salutation)
       end
 
+      def full_name(salutation, credentials)
+        author.full_name(salutation, credentials)
+      end
+
       def age
       end
 
@@ -38,6 +43,9 @@ describe 'Delegate matcher' do
       end
 
       def name_with_salutation(salutation)
+      end
+
+      def full_name(salutation, credentials)
       end
     end.new
   end
@@ -59,10 +67,9 @@ describe 'Delegate matcher' do
 
     it { should delegate(:name).to(:author).via(:writer)   }
     it { should delegate(:name).to(:author).via('writer')  }
-  end
 
-  describe 'foo' do
     it { should delegate(:name_with_salutation).to(:author).with('Ms.')   }
+    it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')   }
   end
 
   describe 'should raise error' do
@@ -79,7 +86,7 @@ describe 'Delegate matcher' do
     end
 
     it 'with both "prefix" and "via"' do
-      expect { should delegate(:name).to(:author).with_prefix().via('writer') }.to raise_error do |error|
+      expect { should delegate(:name).to(:author).with_prefix.via('writer') }.to raise_error do |error|
         expect(error.message).to match /cannot specify delegate using "with_prefix" and "via"/
       end
     end
@@ -130,6 +137,12 @@ describe 'Delegate matcher' do
       its(:description)                  { should eq 'delegate name_with_salutation with arguments Ms. to its author' }
       its(:failure_message)              { should match /expected .* to delegate name_with_salutation with arguments Ms. to its author/ }
       its(:failure_message_when_negated) { should match /expected .* not to delegate name_with_salutation with arguments Ms. to its author/ }
+    end
+
+    context('delegate(:full_name).to(:author).with("Ms.", "Phd")') do
+      its(:description)                  { should eq 'delegate full_name with arguments Ms., Phd to its author' }
+      its(:failure_message)              { should match /expected .* to delegate full_name with arguments Ms., Phd to its author/ }
+      its(:failure_message_when_negated) { should match /expected .* not to delegate full_name with arguments Ms., Phd to its author/ }
     end
   end
 end
