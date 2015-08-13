@@ -46,7 +46,8 @@ describe 'Delegate matcher' do
     it { should delegate(:name).to(:@author)  }
     it { should delegate(:name).to('@author') }
 
-    it { should_not delegate(:age).to(:author) }
+    it { should_not delegate(:age).to(:author)  }
+    it { should_not delegate(:age).to(:@author) }
 
     it { should delegate(:name).to(:author).with_prefix           }
     it { should delegate(:name).to(:author).with_prefix(:writer)  }

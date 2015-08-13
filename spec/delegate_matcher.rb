@@ -5,23 +5,20 @@
 #
 #     describe Post do
 #       it { should delegate(:name).to(:author)   }                     # name         => author.name
-#       it { should delegate(:name).to('author')  }                     # name         => author.name
 #       it { should delegate(:name).to(:@author)  }                     # name         => @author.name
-#       it { should delegate(:name).to('@author') }                     # name         => @author.name
 #
 #       it { should delegate(:name).to(:author).with_prefix }           # author_name  => author.name
 #       it { should delegate(:name).to(:author).with_prefix(:writer) }  # writer_name  => author.name
-#       it { should delegate(:name).to(:author).with_prefix('writer') } # writer_name  => author.name
 #
 #       it { should delegate(:name).to(:author).via(:writer) }          # writer       => author.name
-#       it { should delegate(:name).to(:author).via('writer') }         # writer       => author.name
 #     end
-RSpec::Matchers.define :delegate do |method|
+
+RSpec::Matchers.define(:delegate) do |method|
   match do |delegator|
     raise 'cannot specify delegate using "with_prefix" and "via"' if @prefix && @delegator_method
     raise 'need to provide a "to"' unless @delegate
 
-    @method    = method
+    @method = method
     @delegator = delegator
 
     if delegate_is_an_attribute?
@@ -44,9 +41,9 @@ RSpec::Matchers.define :delegate do |method|
     "delegate #{method} to its #{delegate}#{mechanism}"
   end
 
-  chain(:to)          { |receiver|   @delegate         = receiver }
-  chain(:via)         { |via|        @delegator_method = via }
-  chain(:with_prefix) { |prefix=nil| @prefix           = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:to) { |receiver| @delegate = receiver }
+  chain(:via) { |via| @delegator_method = via }
+  chain(:with_prefix) { |prefix=nil| @prefix = prefix || delegate.to_s.sub(/@/, '') }
 
   private
 
