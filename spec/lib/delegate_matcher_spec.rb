@@ -100,6 +100,10 @@ describe 'Delegate matcher' do
     context 'when delegator does allow nil'
 
     context 'when delegator does not check that delegate is nil' do
+      it { should     delegate(:name).to(:author).allow_nil(false) }
+      it { should_not delegate(:name).to(:author).allow_nil(true) }
+      it { should_not delegate(:name).to(:author).allow_nil }
+
       it { should     delegate(:name).to(:@author).allow_nil(false) }
       it { should_not delegate(:name).to(:@author).allow_nil(true) }
       it { should_not delegate(:name).to(:@author).allow_nil }

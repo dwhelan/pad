@@ -21,7 +21,7 @@ RSpec::Matchers.define(:delegate) do |method|
     @method = method
     @delegator = delegator
 
-    delegate_with_delegate_present? && delegate_with_delegate_nil?
+    delegate? && delegate_with_nil?
 
   end
 
@@ -39,41 +39,37 @@ RSpec::Matchers.define(:delegate) do |method|
     "delegate #{method}#{arguments} to its #{delegate}#{mechanism}"
   end
 
-  chain(:to)          { |receiver|   @delegate         = receiver }
-  chain(:via)         { |via|        @delegator_method = via }
-  chain(:with_prefix) { |prefix=nil| @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)        { |*args|      @args             = args }
-  chain(:allow_nil)   { |allow_nil=true|  @nil_allowed = allow_nil }
+  chain(:to)          { |receiver|       @delegate         = receiver }
+  chain(:via)         { |via|            @delegator_method = via }
+  chain(:with_prefix) { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:with)        { |*args|          @args             = args }
+  chain(:allow_nil)   { |allow_nil=true| @nil_allowed      = allow_nil }
 
   private
 
-  attr_reader :method, :delegator, :delegate, :prefix, :args, :nil_allowed
+  attr_reader :method, :delegator, :delegate, :prefix, :args
 
-  def delegate_with_delegate_present?
+  def delegate?(test_delegate=delegate_double)
     if delegate_is_an_attribute?
-      delegate_to_attribute?(delegate_double, :called)
+      delegate_to_attribute?(test_delegate)
     else
-      delegate_to_method?
+      delegate_to_method?(test_delegate)
     end
   end
 
   def nil_allowed?
-    @nil_allowed.nil? ? false : @nil_allowed
+    !!@nil_allowed
   end
 
-  def delegate_with_delegate_nil?
-    if delegate_is_an_attribute?
-      begin
-        delegate_to_attribute?(nil, :nil)
-        @allowed_nil = true
-      rescue NoMethodError
-        @allowed_nil = false
-      end
-
-      nil_allowed? == @allowed_nil
-    else
-      true
+  def delegate_with_nil?
+    begin
+      @allowed_nil = true
+      delegate?(nil)
+    rescue NoMethodError
+      @allowed_nil = false
     end
+
+    nil_allowed? == @allowed_nil
   end
 
   def delegator_method
@@ -84,30 +80,30 @@ RSpec::Matchers.define(:delegate) do |method|
     @delegate.to_s[0] == '@'
   end
 
-  def delegate_to_attribute?(test_delegate, expected)
+  def delegate_to_attribute?(test_delegate)
     actual_delegate = delegator.instance_variable_get(delegate)
     delegator.instance_variable_set(delegate, test_delegate)
-    delegate?(expected)
+    delegate_called?
   ensure
     delegator.instance_variable_set(delegate, actual_delegate)
   end
 
-  def delegate_to_method?
+  def delegate_to_method?(test_delegate)
     raise "#{delegator} does not respond to #{delegate}" unless delegator.respond_to?(delegate, true)
 
     unless [0, -1].include?(delegator.method(delegate).arity)
       raise "#{delegator}'s' #{delegate} method does not have zero or -1 arity (it expects parameters)"
     end
 
-    allow(delegator).to receive(delegate) { delegate_double }
-    delegate?(:called)
+    allow(delegator).to receive(delegate) { test_delegate }
+    delegate_called?
   end
 
-  def delegate?(expected)
+  def delegate_called?
     if args
-      delegator.send(delegator_method, *args) == expected
+      delegator.send(delegator_method, *args) == :called
     else
-      delegator.send(delegator_method) == expected
+      delegator.send(delegator_method) == :called
     end
   end
 
