@@ -35,6 +35,10 @@ describe 'Delegate matcher' do
         author.full_name(salutation, credentials)
       end
 
+      def name_with_address(*address)
+        author.name_with_address(*address)
+      end
+
       def age
         60
       end
@@ -59,6 +63,10 @@ describe 'Delegate matcher' do
       def full_name(salutation, credentials)
         "#{name_with_salutation(salutation)}, #{credentials}"
       end
+
+      def name_with_address(*address)
+        "#{[name, address].flatten.join(', ')}"
+      end
     end.new
   end
 
@@ -74,6 +82,9 @@ describe 'Delegate matcher' do
 
     it { expect(post.name_with_salutation('Ms.')).to eq 'Ms. Catherine Asaro'}
     it { expect(post.full_name('Ms.', 'Phd')).to     eq 'Ms. Catherine Asaro, Phd'}
+    it { expect(post.name_with_address).to           eq 'Catherine Asaro' }
+    it { expect(post.name_with_address('123 Main St.')).to eq 'Catherine Asaro, 123 Main St.' }
+    it { expect(post.name_with_address('123 Main St.', 'Springfield')).to eq 'Catherine Asaro, 123 Main St., Springfield' }
   end
 
   describe 'delegation' do
@@ -92,8 +103,10 @@ describe 'Delegate matcher' do
     it { should delegate(:name).to(:author).via(:writer)   }
     it { should delegate(:name).to(:author).via('writer')  }
 
-    it { should delegate(:name_with_salutation).to(:author).with('Ms.')   }
-    it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')   }
+    it { should delegate(:name_with_salutation).to(:author).with('Ms.')                      } # single argument
+    it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')                          } # multiple arguments
+    it { should delegate(:name_with_address).to(:author).with('123 Main St.')                } # optional arguments
+    it { should delegate(:name_with_address).to(:author).with('123 Main St.', 'Springfield') } # optional arguments
   end
 
   describe 'allow_nil' do
@@ -110,13 +123,13 @@ describe 'Delegate matcher' do
     context 'when delegator does check that delegate is nil' do
       before { post.author = nil }
 
-      it { should_not     delegate(:name2).to(:author).allow_nil(false) }
-      it { should         delegate(:name2).to(:author).allow_nil(true) }
-      it { should         delegate(:name2).to(:author).allow_nil }
+      it { should_not delegate(:name2).to(:author).allow_nil(false) }
+      it { should     delegate(:name2).to(:author).allow_nil(true) }
+      it { should     delegate(:name2).to(:author).allow_nil }
 
-      it { should_not     delegate(:name2).to(:@author).allow_nil(false) }
-      it { should         delegate(:name2).to(:@author).allow_nil(true) }
-      it { should         delegate(:name2).to(:@author).allow_nil }
+      it { should_not delegate(:name2).to(:@author).allow_nil(false) }
+      it { should     delegate(:name2).to(:@author).allow_nil(true) }
+      it { should     delegate(:name2).to(:@author).allow_nil }
     end
   end
 
