@@ -97,8 +97,6 @@ describe 'Delegate matcher' do
   end
 
   describe 'allow_nil' do
-    context 'when delegator does allow nil'
-
     context 'when delegator does not check that delegate is nil' do
       it { should     delegate(:name).to(:author).allow_nil(false) }
       it { should_not delegate(:name).to(:author).allow_nil(true) }
@@ -111,9 +109,14 @@ describe 'Delegate matcher' do
 
     context 'when delegator does check that delegate is nil' do
       before { post.author = nil }
+
+      it { should_not     delegate(:name2).to(:author).allow_nil(false) }
+      it { should         delegate(:name2).to(:author).allow_nil(true) }
+      it { should         delegate(:name2).to(:author).allow_nil }
+
       it { should_not     delegate(:name2).to(:@author).allow_nil(false) }
-      it { should delegate(:name2).to(:@author).allow_nil(true) }
-      it { should delegate(:name2).to(:@author).allow_nil }
+      it { should         delegate(:name2).to(:@author).allow_nil(true) }
+      it { should         delegate(:name2).to(:@author).allow_nil }
     end
   end
 
@@ -161,39 +164,39 @@ describe 'Delegate matcher' do
     end
 
     context('delegate(:name).to(:@author)') do
-      its(:description)                  { should eq 'delegate name to its @author' }
-      its(:failure_message)              { should match /expected .* to delegate name to its @author/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its @author/ }
+      its(:description) { should eq 'delegate name to its @author' }
     end
 
     context('delegate(:name).to(:author).with_prefix') do
-      its(:description)                  { should eq 'delegate name to its author with prefix author' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author with prefix author/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author with prefix author/ }
+      its(:description) { should eq 'delegate name to its author with prefix author' }
     end
 
     context('delegate(:name).to(:author).with_prefix("writer")') do
-      its(:description)                  { should eq 'delegate name to its author with prefix writer' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author with prefix writer/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author with prefix writer/ }
+      its(:description) { should eq 'delegate name to its author with prefix writer' }
     end
 
     context('delegate(:name).to(:author).via("writer")') do
-      its(:description)                  { should eq 'delegate name to its author via writer' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author via writer/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author via writer/ }
+      its(:description) { should eq 'delegate name to its author via writer' }
     end
 
     context('delegate(:name_with_salutation).to(:author).with("Ms.")') do
-      its(:description)                  { should eq 'delegate name_with_salutation with arguments Ms. to its author' }
-      its(:failure_message)              { should match /expected .* to delegate name_with_salutation with arguments Ms. to its author/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name_with_salutation with arguments Ms. to its author/ }
+      its(:description) { should eq 'delegate name_with_salutation with arguments Ms. to its author' }
     end
 
     context('delegate(:full_name).to(:author).with("Ms.", "Phd")') do
-      its(:description)                  { should eq 'delegate full_name with arguments Ms., Phd to its author' }
-      its(:failure_message)              { should match /expected .* to delegate full_name with arguments Ms., Phd to its author/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate full_name with arguments Ms., Phd to its author/ }
+      its(:description) { should eq 'delegate full_name with arguments Ms., Phd to its author' }
+    end
+
+    context('delegate(:name).to(:author).allow_nil') do
+      its(:description) { should eq 'delegate name to its author with nil allowed' }
+    end
+
+    context('delegate(:name).to(:author).allow_nil(true)') do
+      its(:description) { should eq 'delegate name to its author with nil allowed' }
+    end
+
+    context('delegate(:name).to(:author).allow_nil(false)') do
+      its(:description) { should eq 'delegate name to its author with nil not allowed' }
     end
   end
 end

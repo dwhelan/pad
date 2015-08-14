@@ -35,8 +35,16 @@ RSpec::Matchers.define(:delegate) do |method|
                   else
                     ''
                 end
+    nil_allowed = case
+                    when @nil_allowed == true
+                      " with nil allowed"
+                    when @nil_allowed == false
+                      " with nil not allowed"
+                    else
+                      ''
+                  end
 
-    "delegate #{method}#{arguments} to its #{delegate}#{mechanism}"
+    "delegate #{method}#{arguments} to its #{delegate}#{mechanism}#{nil_allowed}"
   end
 
   chain(:to)          { |receiver|       @delegate         = receiver }
