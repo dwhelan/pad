@@ -21,11 +21,8 @@ RSpec::Matchers.define(:delegate) do |method|
     @method = method
     @delegator = delegator
 
-    if delegate_is_an_attribute?
-      delegate_to_attribute?
-    else
-      delegate_to_method?
-    end
+    delegate_with_delegate_present? && delegate_with_delegate_nil?
+
   end
 
   description do
@@ -46,10 +43,38 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:via)         { |via|        @delegator_method = via }
   chain(:with_prefix) { |prefix=nil| @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)        { |*args|      @args             = args }
+  chain(:allow_nil)   { |allow_nil=true|  @nil_allowed = allow_nil }
 
   private
 
-  attr_reader :method, :delegator, :delegate, :prefix, :args
+  attr_reader :method, :delegator, :delegate, :prefix, :args, :nil_allowed
+
+  def delegate_with_delegate_present?
+    if delegate_is_an_attribute?
+      delegate_to_attribute?(delegate_double, :called)
+    else
+      delegate_to_method?
+    end
+  end
+
+  def nil_allowed?
+    @nil_allowed.nil? ? false : @nil_allowed
+  end
+
+  def delegate_with_delegate_nil?
+    if delegate_is_an_attribute?
+      begin
+        delegate_to_attribute?(nil, :nil)
+        @allowed_nil = true
+      rescue NoMethodError
+        @allowed_nil = false
+      end
+
+      nil_allowed? == @allowed_nil
+    else
+      true
+    end
+  end
 
   def delegator_method
     @delegator_method || (prefix ? :"#{prefix}_#{method}" : method)
@@ -59,10 +84,10 @@ RSpec::Matchers.define(:delegate) do |method|
     @delegate.to_s[0] == '@'
   end
 
-  def delegate_to_attribute?
+  def delegate_to_attribute?(test_delegate, expected)
     actual_delegate = delegator.instance_variable_get(delegate)
-    delegator.instance_variable_set(delegate, delegate_double)
-    delegate?
+    delegator.instance_variable_set(delegate, test_delegate)
+    delegate?(expected)
   ensure
     delegator.instance_variable_set(delegate, actual_delegate)
   end
@@ -75,14 +100,14 @@ RSpec::Matchers.define(:delegate) do |method|
     end
 
     allow(delegator).to receive(delegate) { delegate_double }
-    delegate?
+    delegate?(:called)
   end
 
-  def delegate?
+  def delegate?(expected)
     if args
-      delegator.send(delegator_method, *args) == :called
+      delegator.send(delegator_method, *args) == expected
     else
-      delegator.send(delegator_method) == :called
+      delegator.send(delegator_method) == expected
     end
   end
 

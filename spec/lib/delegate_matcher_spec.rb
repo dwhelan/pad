@@ -11,6 +11,10 @@ describe 'Delegate matcher' do
         author.name
       end
 
+      def name2
+        author && author.name2
+      end
+
       def author_name
         author.name
       end
@@ -41,6 +45,10 @@ describe 'Delegate matcher' do
   let(:author) do
     Class.new do
       def name
+        'Catherine Asaro'
+      end
+
+      def name2
         'Catherine Asaro'
       end
 
@@ -88,8 +96,25 @@ describe 'Delegate matcher' do
     it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')   }
   end
 
+  describe 'allow_nil' do
+    context 'when delegator does allow nil'
+
+    context 'when delegator does not check that delegate is nil' do
+      it { should     delegate(:name).to(:@author).allow_nil(false) }
+      it { should_not delegate(:name).to(:@author).allow_nil(true) }
+      it { should_not delegate(:name).to(:@author).allow_nil }
+    end
+
+    context 'when delegator does check that delegate is nil' do
+      before { post.author = nil }
+      it { should_not     delegate(:name2).to(:@author).allow_nil(false) }
+      it { should delegate(:name2).to(:@author).allow_nil(true) }
+      it { should delegate(:name2).to(:@author).allow_nil }
+    end
+  end
+
   describe 'should raise error' do
-    it 'with "to" not specifieid' do
+    it 'with "to" not specified' do
       expect { should delegate(:name) }.to raise_error do |error|
         expect(error.message).to match /need to provide a "to"/
       end
