@@ -7,12 +7,14 @@ describe 'Delegate matcher' do
     Class.new do
       attr_accessor :author
 
-      # Does a null check
       def first_name
-        author && author.first_name
+        author.first_name if author
       end
 
-      # Accepts a block
+      def middle_name(initial, &block)
+        author.middle_name(initial, &block)
+      end
+
       def last_name(&block)
         author.last_name(&block)
       end
@@ -58,6 +60,10 @@ describe 'Delegate matcher' do
         'Catherine'
       end
 
+      def middle_name(initial, &block)
+        initial ? "A#{block.call}"  : "Ann#{block.call}"
+      end
+
       def last_name(&block)
         "Asaro#{block.call}"
       end
@@ -91,11 +97,17 @@ describe 'Delegate matcher' do
     its(:writer_name) { should eq 'Catherine Asaro' }
     its(:age)         { should eq 60                }
 
-    it { expect(post.last_name {|author| ' is an author'}).to eq 'Asaro is an author'}
-    it { expect(post.name_with_salutation('Ms.')).to eq 'Ms. Catherine Asaro'}
-    it { expect(post.full_name('Ms.', 'Phd')).to     eq 'Ms. Catherine Asaro, Phd'}
-    it { expect(post.name_with_address).to           eq 'Catherine Asaro' }
-    it { expect(post.name_with_address('123 Main St.')).to eq 'Catherine Asaro, 123 Main St.' }
+    it { expect(post.middle_name(true)  {' is her middle initial'}).to eq 'A is her middle initial' }
+    it { expect(post.middle_name(false) {' is her middle name'}).to    eq 'Ann is her middle name'  }
+
+    it { expect(post.last_name {' is an author'}).to eq 'Asaro is an author' }
+
+    it { expect(post.name_with_salutation('Ms.')).to eq 'Ms. Catherine Asaro' }
+
+    it { expect(post.full_name('Ms.', 'Phd')).to     eq 'Ms. Catherine Asaro, Phd' }
+
+    it { expect(post.name_with_address).to                                eq 'Catherine Asaro' }
+    it { expect(post.name_with_address('123 Main St.')).to                eq 'Catherine Asaro, 123 Main St.' }
     it { expect(post.name_with_address('123 Main St.', 'Springfield')).to eq 'Catherine Asaro, 123 Main St., Springfield' }
   end
 
@@ -114,7 +126,9 @@ describe 'Delegate matcher' do
 
     it { should delegate(:name).to(:author).via(:writer)   }
     it { should delegate(:name).to(:author).via('writer')  }
+  end
 
+  describe 'arguments' do
     it { should delegate(:name_with_salutation).to(:author).with('Ms.')                      } # single argument
     it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')                          } # multiple arguments
     it { should delegate(:name_with_address).to(:author).with('123 Main St.')                } # optional arguments
@@ -122,8 +136,23 @@ describe 'Delegate matcher' do
   end
 
   describe 'blocks' do
-    it { should     delegate(:last_name).to(:author).with_block }
-    it { should_not delegate(:name).to(:author).with_block      }
+    it { should     delegate(:last_name).to(:author).with_block       }
+    it { should     delegate(:last_name).to(:author).with_block(true) }
+    it { should_not delegate(:last_name).to(:author).without_block    }
+
+    it { should_not delegate(:name).to(:author).with_block            }
+    it { should     delegate(:name).to(:author).with_block(false)     }
+    it { should     delegate(:name).to(:author).without_block         }
+  end
+
+  describe 'arguments and blocks' do
+    it { should     delegate(:last_name).to(:author).with_block       }
+    it { should     delegate(:last_name).to(:author).with_block(true) }
+    it { should_not delegate(:last_name).to(:author).without_block    }
+
+    it { should_not delegate(:name).to(:author).with_block            }
+    it { should     delegate(:name).to(:author).with_block(false)     }
+    it { should     delegate(:name).to(:author).without_block         }
   end
 
   describe 'allow_nil' do
@@ -182,7 +211,7 @@ describe 'Delegate matcher' do
     end
   end
 
-  describe 'messages' do
+  describe 'description' do
     let(:matcher) { self.class.parent_groups[1].description }
     subject       { eval matcher }
     before        { subject.matches? post }
@@ -228,9 +257,22 @@ describe 'Delegate matcher' do
     context('delegate(:name).to(:author).allow_nil(false)') do
       its(:description) { should eq 'delegate name to its author with nil not allowed' }
     end
+
+    context('delegate(:last_name).to(:author).with_block') do
+      its(:description) { should eq 'delegate last_name to its author with block' }
+    end
+
+    context('delegate(:last_name).to(:author).with_block(true)') do
+      its(:description) { should eq 'delegate last_name to its author with block' }
+    end
+
+    context('delegate(:last_name).to(:author).with_block(false)') do
+      its(:description) { should eq 'delegate last_name to its author without block' }
+    end
   end
 end
 
-# error messages with block
 # handle block arguments
 # error if args not passed correctly to delegate (extra, missing, etc)
+# treat arg mismatch as a match failure rather than an exception
+# args and block

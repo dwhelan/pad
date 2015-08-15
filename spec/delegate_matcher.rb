@@ -42,8 +42,16 @@ RSpec::Matchers.define(:delegate) do |method|
                     else
                       ''
                   end
+    block = case
+                    when @block == true
+                      " with block"
+                    when @block == false
+                      " without block"
+                    else
+                      ''
+                  end
 
-    "delegate #{method}#{arguments} to its #{delegate}#{mechanism}#{nil_allowed}"
+    "delegate #{method}#{arguments} to its #{delegate}#{mechanism}#{nil_allowed}#{block}"
   end
 
   chain(:to)          { |receiver|       @delegate         = receiver }
@@ -51,6 +59,7 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:with_prefix) { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)        { |*args|          @args             = args }
   chain(:with_block)  { |block=true|     @block            = block }
+  chain(:without_block)  {               @block            = false }
   chain(:allow_nil)   { |allow_nil=true| @nil_allowed      = allow_nil }
 
   private
@@ -115,11 +124,7 @@ RSpec::Matchers.define(:delegate) do |method|
     if args
       delegator.send(delegator_method, *args) == :called
     else
-      if @block
-        delegator.send(delegator_method){} == :called
-      else
-        delegator.send(delegator_method) == :called
-      end
+      delegator.send(delegator_method){} == :called
     end
   rescue RSpec::Mocks::MockExpectationError => e
     false
