@@ -7,12 +7,18 @@ describe 'Delegate matcher' do
     Class.new do
       attr_accessor :author
 
-      def name
-        author.name
+      # Does a null check
+      def first_name
+        author && author.first_name
       end
 
-      def name2
-        author && author.name2
+      # Accepts a block
+      def last_name(&block)
+        author.last_name(&block)
+      end
+
+      def name
+        author.name
       end
 
       def author_name
@@ -48,11 +54,15 @@ describe 'Delegate matcher' do
 
   let(:author) do
     Class.new do
-      def name
-        'Catherine Asaro'
+      def first_name
+        'Catherine'
       end
 
-      def name2
+      def last_name(&block)
+        "Asaro#{block.call}"
+      end
+
+      def name
         'Catherine Asaro'
       end
 
@@ -74,12 +84,14 @@ describe 'Delegate matcher' do
   before  { post.author = author }
 
   describe 'test support' do
+    its(:first_name)  { should eq 'Catherine' }
     its(:name)        { should eq 'Catherine Asaro' }
     its(:author_name) { should eq 'Catherine Asaro' }
     its(:writer)      { should eq 'Catherine Asaro' }
     its(:writer_name) { should eq 'Catherine Asaro' }
     its(:age)         { should eq 60                }
 
+    it { expect(post.last_name {|author| ' is an author'}).to eq 'Asaro is an author'}
     it { expect(post.name_with_salutation('Ms.')).to eq 'Ms. Catherine Asaro'}
     it { expect(post.full_name('Ms.', 'Phd')).to     eq 'Ms. Catherine Asaro, Phd'}
     it { expect(post.name_with_address).to           eq 'Catherine Asaro' }
@@ -109,27 +121,32 @@ describe 'Delegate matcher' do
     it { should delegate(:name_with_address).to(:author).with('123 Main St.', 'Springfield') } # optional arguments
   end
 
+  describe 'blocks' do
+    it { should     delegate(:last_name).to(:author) }
+    it { should_not delegate(:name).to(:author).with_block      }
+  end
+
   describe 'allow_nil' do
     context 'when delegator does not check that delegate is nil' do
       it { should     delegate(:name).to(:author).allow_nil(false) }
-      it { should_not delegate(:name).to(:author).allow_nil(true) }
-      it { should_not delegate(:name).to(:author).allow_nil }
+      it { should_not delegate(:name).to(:author).allow_nil(true)  }
+      it { should_not delegate(:name).to(:author).allow_nil        }
 
       it { should     delegate(:name).to(:@author).allow_nil(false) }
-      it { should_not delegate(:name).to(:@author).allow_nil(true) }
-      it { should_not delegate(:name).to(:@author).allow_nil }
+      it { should_not delegate(:name).to(:@author).allow_nil(true)  }
+      it { should_not delegate(:name).to(:@author).allow_nil        }
     end
 
     context 'when delegator does check that delegate is nil' do
       before { post.author = nil }
 
-      it { should_not delegate(:name2).to(:author).allow_nil(false) }
-      it { should     delegate(:name2).to(:author).allow_nil(true) }
-      it { should     delegate(:name2).to(:author).allow_nil }
+      it { should_not delegate(:first_name).to(:author).allow_nil(false) }
+      it { should     delegate(:first_name).to(:author).allow_nil(true)  }
+      it { should     delegate(:first_name).to(:author).allow_nil        }
 
-      it { should_not delegate(:name2).to(:@author).allow_nil(false) }
-      it { should     delegate(:name2).to(:@author).allow_nil(true) }
-      it { should     delegate(:name2).to(:@author).allow_nil }
+      it { should_not delegate(:first_name).to(:@author).allow_nil(false) }
+      it { should     delegate(:first_name).to(:@author).allow_nil(true)  }
+      it { should     delegate(:first_name).to(:@author).allow_nil        }
     end
   end
 
@@ -213,3 +230,8 @@ describe 'Delegate matcher' do
     end
   end
 end
+
+# error messages with block
+# handle block arguments
+# error if block provided with @author
+# error if args not passed correctly to delegate (extra, missing, etc)

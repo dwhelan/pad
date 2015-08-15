@@ -51,6 +51,7 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:via)         { |via|            @delegator_method = via }
   chain(:with_prefix) { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)        { |*args|          @args             = args }
+  chain(:with_block)  {                  @block            = true }
   chain(:allow_nil)   { |allow_nil=true| @nil_allowed      = allow_nil }
 
   private
@@ -111,14 +112,22 @@ RSpec::Matchers.define(:delegate) do |method|
     if args
       delegator.send(delegator_method, *args) == :called
     else
-      delegator.send(delegator_method) == :called
+      if @block
+        delegator.send(delegator_method){} == :called
+      else
+        delegator.send(delegator_method) == :called
+      end
     end
+  rescue RSpec::Mocks::MockExpectationError => e
+    false
   end
 
   def delegate_double
+    @block_passed = false
     double('delegate').tap do |delegate|
       call = receive(method)
-      call = call.with(*args) if args
+      call = call.with(*args)  if args
+      call = call.and_yield()  if @block
       allow(delegate).to(call) { :called }
     end
   end
