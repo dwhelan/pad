@@ -11,6 +11,10 @@
 #       it { should delegate(:name).to(:author).with_prefix(:writer) }  # writer_name  => author.name
 #
 #       it { should delegate(:name).to(:author).via(:writer) }          # writer       => author.name
+#
+#       it { should delegate(:name).to(:author).allow_nil   }           # name         => author && author.name
+#       it { should delegate(:name).to(:author).allow_nil(true)   }     # name         => author && author.name
+#       it { should delegate(:name).to(:author).allow_nil(false)   }    # name         => author.name
 #     end
 
 RSpec::Matchers.define(:delegate) do |method|
@@ -54,13 +58,13 @@ RSpec::Matchers.define(:delegate) do |method|
     "delegate #{method}#{arguments} to its #{delegate}#{mechanism}#{nil_allowed}#{block}"
   end
 
-  chain(:to)          { |receiver|       @delegate         = receiver }
-  chain(:via)         { |via|            @delegator_method = via }
-  chain(:with_prefix) { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)        { |*args|          @args             = args }
-  chain(:with_block)  { |block=true|     @block            = block }
-  chain(:without_block)  {               @block            = false }
-  chain(:allow_nil)   { |allow_nil=true| @nil_allowed      = allow_nil }
+  chain(:to)            { |receiver|       @delegate         = receiver }
+  chain(:allow_nil)     { |allow_nil=true| @nil_allowed      = allow_nil }
+  chain(:via)           { |via|            @delegator_method = via }
+  chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:with)          { |*args|          @args             = args }
+  chain(:with_block)    { |block=true|     @block            = block }
+  chain(:without_block) {                  @block            = false }
 
   private
 
@@ -122,9 +126,9 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def delegate_called?
     if args
-      delegator.send(delegator_method, *args) == :called
+      delegator.send(delegator_method, *args) {} == :called
     else
-      delegator.send(delegator_method){} == :called
+      delegator.send(delegator_method)        {} == :called
     end
   rescue RSpec::Mocks::MockExpectationError => e
     false
@@ -136,7 +140,6 @@ RSpec::Matchers.define(:delegate) do |method|
     call = receive(method)
     call = call.with(*args)  if args
 
-    @block_passed = false
     allow(delegate).to(call.and_wrap_original) do |original_method, *args, &block|
       @block_passed = !block.nil?
       :called

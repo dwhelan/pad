@@ -119,40 +119,17 @@ describe 'Delegate matcher' do
 
     it { should_not delegate(:age).to(:author)  }
     it { should_not delegate(:age).to(:@author) }
+  end
 
+  describe 'with_prefix' do
     it { should delegate(:name).to(:author).with_prefix           }
     it { should delegate(:name).to(:author).with_prefix(:writer)  }
     it { should delegate(:name).to(:author).with_prefix('writer') }
+  end
 
+  describe 'via' do
     it { should delegate(:name).to(:author).via(:writer)   }
     it { should delegate(:name).to(:author).via('writer')  }
-  end
-
-  describe 'arguments' do
-    it { should delegate(:name_with_salutation).to(:author).with('Ms.')                      } # single argument
-    it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')                          } # multiple arguments
-    it { should delegate(:name_with_address).to(:author).with('123 Main St.')                } # optional arguments
-    it { should delegate(:name_with_address).to(:author).with('123 Main St.', 'Springfield') } # optional arguments
-  end
-
-  describe 'blocks' do
-    it { should     delegate(:last_name).to(:author).with_block       }
-    it { should     delegate(:last_name).to(:author).with_block(true) }
-    it { should_not delegate(:last_name).to(:author).without_block    }
-
-    it { should_not delegate(:name).to(:author).with_block            }
-    it { should     delegate(:name).to(:author).with_block(false)     }
-    it { should     delegate(:name).to(:author).without_block         }
-  end
-
-  describe 'arguments and blocks' do
-    it { should     delegate(:last_name).to(:author).with_block       }
-    it { should     delegate(:last_name).to(:author).with_block(true) }
-    it { should_not delegate(:last_name).to(:author).without_block    }
-
-    it { should_not delegate(:name).to(:author).with_block            }
-    it { should     delegate(:name).to(:author).with_block(false)     }
-    it { should     delegate(:name).to(:author).without_block         }
   end
 
   describe 'allow_nil' do
@@ -177,6 +154,27 @@ describe 'Delegate matcher' do
       it { should     delegate(:first_name).to(:@author).allow_nil(true)  }
       it { should     delegate(:first_name).to(:@author).allow_nil        }
     end
+  end
+
+  describe 'arguments' do
+    it { should delegate(:name_with_salutation).to(:author).with('Ms.')                      } # single argument
+    it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')                          } # multiple arguments
+    it { should delegate(:name_with_address).to(:author).with('123 Main St.')                } # optional arguments
+    it { should delegate(:name_with_address).to(:author).with('123 Main St.', 'Springfield') } # optional arguments
+  end
+
+  describe 'blocks' do
+    it { should     delegate(:last_name).to(:author).with_block       }
+    it { should     delegate(:last_name).to(:author).with_block(true) }
+    it { should_not delegate(:last_name).to(:author).without_block    }
+
+    it { should_not delegate(:name).to(:author).with_block            }
+    it { should     delegate(:name).to(:author).with_block(false)     }
+    it { should     delegate(:name).to(:author).without_block         }
+  end
+
+  describe 'arguments and blocks' do
+    it { should delegate(:middle_name).to(:author).with(true).with_block }
   end
 
   describe 'should raise error' do
@@ -272,7 +270,6 @@ describe 'Delegate matcher' do
   end
 end
 
-# handle block arguments
 # error if args not passed correctly to delegate (extra, missing, etc)
 # treat arg mismatch as a match failure rather than an exception
-# args and block
+# handle default arguments supplied by delegator
