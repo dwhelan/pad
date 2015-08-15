@@ -47,9 +47,9 @@ RSpec::Matchers.define(:delegate) do |method|
                       ''
                   end
     block = case
-                    when @block == true
+                    when @expected_block == true
                       " with block"
-                    when @block == false
+                    when @expected_block == false
                       " without block"
                     else
                       ''
@@ -63,8 +63,8 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:via)           { |via|            @delegator_method = via }
   chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)          { |*args|          @expected_args    = args }
-  chain(:with_block)    { |block=true|     @block            = block }
-  chain(:without_block) {                  @block            = false }
+  chain(:with_block)    { |block=true|     @expected_block            = block }
+  chain(:without_block) {                  @expected_block            = false }
 
   private
 
@@ -83,7 +83,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def block_expected?
-    !!@block
+    !!@expected_block
   end
 
   def delegate_with_nil?
