@@ -29,33 +29,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   description do
-    arguments = expected_args ? " with arguments #{expected_args.join ', '}" : ''
-    mechanism = case
-                  when @delegator_method
-                    " via #{@delegator_method}"
-                  when @prefix
-                    " with prefix #{@prefix}"
-                  else
-                    ''
-                end
-    nil_allowed = case
-                    when @nil_allowed == true
-                      " with nil allowed"
-                    when @nil_allowed == false
-                      " with nil not allowed"
-                    else
-                      ''
-                  end
-    block = case
-                    when @expected_block == true
-                      " with block"
-                    when @expected_block == false
-                      " without block"
-                    else
-                      ''
-                  end
-
-    "delegate #{method}#{arguments} to its #{delegate}#{mechanism}#{nil_allowed}#{block}"
+    "delegate #{method}#{arguments_description} to its #{delegation_description}#{nil_description}#{block_description}"
   end
 
   chain(:to)            { |receiver|       @delegate         = receiver }
@@ -63,12 +37,49 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:via)           { |via|            @delegator_method = via }
   chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)          { |*args|          @expected_args    = args }
-  chain(:with_block)    { |block=true|     @expected_block            = block }
-  chain(:without_block) {                  @expected_block            = false }
+  chain(:with_block)    { |block=true|     @expected_block   = block }
+  chain(:without_block) {                  @expected_block   = false }
 
   private
 
   attr_reader :method, :delegator, :delegate, :prefix, :expected_args
+
+  def arguments_description
+    expected_args ? " with arguments #{expected_args.join ', '}" : ''
+  end
+
+  def delegation_description
+    delegate.to_s + case
+      when @delegator_method
+        " via #{@delegator_method}"
+      when @prefix
+        " with prefix #{@prefix}"
+      else
+        ''
+    end
+  end
+
+  def nil_description
+    case
+      when @nil_allowed == true
+        ' with nil allowed'
+      when @nil_allowed == false
+        ' with nil not allowed'
+      else
+        ''
+    end
+  end
+
+  def block_description
+    case
+      when @expected_block == true
+        ' with block'
+      when @expected_block == false
+        ' without block'
+      else
+        ''
+    end
+  end
 
   def delegate?(test_delegate=delegate_double)
     if delegate_is_an_attribute?
