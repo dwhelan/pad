@@ -29,7 +29,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   description do
-    arguments = args ? " with arguments #{args.join ', '}" : ''
+    arguments = expected_args ? " with arguments #{expected_args.join ', '}" : ''
     mechanism = case
                   when @delegator_method
                     " via #{@delegator_method}"
@@ -62,13 +62,13 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:allow_nil)     { |allow_nil=true| @nil_allowed      = allow_nil }
   chain(:via)           { |via|            @delegator_method = via }
   chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)          { |*args|          @args             = args }
+  chain(:with)          { |*args|          @expected_args    = args }
   chain(:with_block)    { |block=true|     @block            = block }
   chain(:without_block) {                  @block            = false }
 
   private
 
-  attr_reader :method, :delegator, :delegate, :prefix, :args
+  attr_reader :method, :delegator, :delegate, :prefix, :expected_args
 
   def delegate?(test_delegate=delegate_double)
     if delegate_is_an_attribute?
@@ -125,8 +125,8 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_called?
-    if args
-      delegator.send(delegator_method, *args) {} == :called
+    if expected_args
+      delegator.send(delegator_method, *expected_args) {} == :called
     else
       delegator.send(delegator_method)        {} == :called
     end
@@ -138,9 +138,10 @@ RSpec::Matchers.define(:delegate) do |method|
     delegate = Object.new
 
     call = receive(method)
-    call = call.with(*args)  if args
+    call = call.with(*expected_args)  if expected_args
 
     allow(delegate).to(call.and_wrap_original) do |original_method, *args, &block|
+      @actual_args = args
       @block_passed = !block.nil?
       :called
     end
