@@ -122,7 +122,7 @@ describe 'Delegate matcher' do
   end
 
   describe 'blocks' do
-    it { should     delegate(:last_name).to(:author) }
+    it { should     delegate(:last_name).to(:author).with_block }
     it { should_not delegate(:name).to(:author).with_block      }
   end
 
@@ -233,5 +233,4 @@ end
 
 # error messages with block
 # handle block arguments
-# error if block provided with @author
 # error if args not passed correctly to delegate (extra, missing, etc)

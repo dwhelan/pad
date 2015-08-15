@@ -21,8 +21,7 @@ RSpec::Matchers.define(:delegate) do |method|
     @method = method
     @delegator = delegator
 
-    delegate? && delegate_with_nil?
-
+    delegate_with_nil? && delegate? && (@block_passed == block_expected?)
   end
 
   description do
@@ -51,7 +50,7 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:via)         { |via|            @delegator_method = via }
   chain(:with_prefix) { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)        { |*args|          @args             = args }
-  chain(:with_block)  {                  @block            = true }
+  chain(:with_block)  { |block=true|     @block            = block }
   chain(:allow_nil)   { |allow_nil=true| @nil_allowed      = allow_nil }
 
   private
@@ -68,6 +67,10 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def nil_allowed?
     !!@nil_allowed
+  end
+
+  def block_expected?
+    !!@block
   end
 
   def delegate_with_nil?
@@ -123,12 +126,17 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_double
+    delegate = Object.new
+
+    call = receive(method)
+    call = call.with(*args)  if args
+
     @block_passed = false
-    double('delegate').tap do |delegate|
-      call = receive(method)
-      call = call.with(*args)  if args
-      call = call.and_yield()  if @block
-      allow(delegate).to(call) { :called }
+    allow(delegate).to(call.and_wrap_original) do |original_method, *args, &block|
+      @block_passed = !block.nil?
+      :called
     end
+
+    delegate
   end
 end
