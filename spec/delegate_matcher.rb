@@ -25,7 +25,7 @@ RSpec::Matchers.define(:delegate) do |method|
     @method = method
     @delegator = delegator
 
-    delegate_with_nil? && delegate? && (@block_passed == block_expected?)
+    delegate_with_nil? && delegate? && (@actual_block == block_expected?)
   end
 
   description do
@@ -152,8 +152,8 @@ RSpec::Matchers.define(:delegate) do |method|
     call = call.with(*expected_args)  if expected_args
 
     allow(delegate).to(call.and_wrap_original) do |original_method, *args, &block|
-      @actual_args = args
-      @block_passed = !block.nil?
+      @actual_args  = args
+      @actual_block = !block.nil?
       :called
     end
 
