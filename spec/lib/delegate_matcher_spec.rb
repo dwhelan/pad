@@ -257,15 +257,21 @@ describe 'Delegate matcher' do
     end
 
     context('delegate(:last_name).to(:author).with_block') do
-      its(:description) { should eq 'delegate last_name to its author with block' }
+      its(:description) { should eq 'delegate last_name to its author with a block' }
     end
 
     context('delegate(:last_name).to(:author).with_block(true)') do
-      its(:description) { should eq 'delegate last_name to its author with block' }
+      its(:description) { should eq 'delegate last_name to its author with a block' }
     end
 
-    context('delegate(:last_name).to(:author).with_block(false)') do
-      its(:description) { should eq 'delegate last_name to its author without block' }
+    context('delegate(:name).to(:author).with_block') do
+      its(:description)                  { should eq 'delegate name to its author with a block' }
+      its(:failure_message)              { should match /expected .* to delegate name to its author with a block but a block was not passed to author.name/ }
+    end
+
+    context('delegate(:name).to(:author).without_block') do
+      its(:description)                  { should eq 'delegate name to its author without a block' }
+      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author without a block but a block was not passed to author.name/ }
     end
   end
 end

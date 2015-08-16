@@ -25,11 +25,39 @@ RSpec::Matchers.define(:delegate) do |method|
     @method = method
     @delegator = delegator
 
-    delegate_with_nil? && delegate? && (@actual_block == block_expected?)
+    delegate? && delegate_with_nil? && block_ok?
   end
 
   description do
     "delegate #{method}#{arguments_description} to its #{delegation_description}#{nil_description}#{block_description}"
+  end
+
+  def failure_message
+    super + ' but' + block_failure_message
+  end
+
+  def failure_message_when_negated
+    super + ' but' + block_failure_message_when_negated
+  end
+
+  def block_failure_message
+    case
+      when block_ok?
+        ''
+      when @expected_block
+        " a block was not passed to #{delegate}.#{method}"
+      else
+        " a block was passed to #{delegate}.#{method}"
+    end
+  end
+
+  def block_failure_message_when_negated
+    case
+      when @expected_block
+        " a block was passed to #{delegate}.#{method}"
+      else
+        " a block was not passed to #{delegate}.#{method}"
+    end
   end
 
   chain(:to)            { |receiver|       @delegate         = receiver }
@@ -43,6 +71,10 @@ RSpec::Matchers.define(:delegate) do |method|
   private
 
   attr_reader :method, :delegator, :delegate, :prefix, :expected_args
+
+  def block_ok?
+    @actual_block == block_expected?
+  end
 
   def arguments_description
     expected_args ? " with arguments #{expected_args.join ', '}" : ''
@@ -73,9 +105,9 @@ RSpec::Matchers.define(:delegate) do |method|
   def block_description
     case
       when @expected_block == true
-        ' with block'
+        ' with a block'
       when @expected_block == false
-        ' without block'
+        ' without a block'
       else
         ''
     end
