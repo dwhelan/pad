@@ -149,21 +149,15 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_called?
-    if expected_args
-      delegator.send(delegator_method, *@args) {} == :called
-    else
-      delegator.send(delegator_method)        {} == :called
-    end
-  rescue RSpec::Mocks::MockExpectationError => e
-    false
+    delegator.send(delegator_method, *@args) {} == self
   end
 
   def delegate_double
-    Object.new.tap do |delegate|
+    double('delegate').tap do |delegate|
       allow(delegate).to(receive(method)) do |*args, &block|
         @actual_args  = args
         @actual_block = !block.nil?
-        :called
+        self
       end
     end
   end
