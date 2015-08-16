@@ -33,30 +33,18 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def failure_message
-    super + ' but' + block_failure_message
+    super + ' but' + block_failure_message(false)
   end
 
   def failure_message_when_negated
-    super + ' but' + block_failure_message_when_negated
+    super + ' but' + block_failure_message(true)
   end
 
-  def block_failure_message
-    case
-      when block_ok?
-        ''
-      when @expected_block
-        " a block was not passed to #{delegate}.#{method}"
-      else
-        " a block was passed to #{delegate}.#{method}"
-    end
-  end
-
-  def block_failure_message_when_negated
-    case
-      when @expected_block
-        " a block was passed to #{delegate}.#{method}"
-      else
-        " a block was not passed to #{delegate}.#{method}"
+  def block_failure_message(negated)
+    if @expected_block
+      " a block was #{negated ? '' : 'not '}passed to #{delegate}.#{method}"
+    else
+      " a block was #{negated ? 'not ' : ''}passed to #{delegate}.#{method}"
     end
   end
 

@@ -265,8 +265,8 @@ describe 'Delegate matcher' do
     end
 
     context('delegate(:name).to(:author).with_block') do
-      its(:description)                  { should eq 'delegate name to its author with a block' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author with a block but a block was not passed to author.name/ }
+      its(:description)     { should eq 'delegate name to its author with a block' }
+      its(:failure_message) { should match /expected .* to delegate name to its author with a block but a block was not passed to author.name/ }
     end
 
     context('delegate(:name).to(:author).without_block') do
