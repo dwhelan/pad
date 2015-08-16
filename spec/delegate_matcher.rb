@@ -45,15 +45,29 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:via)           { |via|            @delegator_method = via }
   chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)          { |*args|          @expected_args    = args }
-  chain(:with_block)    { |block=true|     @expected_block   = block }
+  chain(:with_block)    {                  @expected_block   = true  }
   chain(:without_block) {                  @expected_block   = false }
+
+  alias_method :with_a_block,    :with_block
+  alias_method :without_a_block, :without_block
 
   private
 
   attr_reader :method, :delegator, :delegate, :prefix, :expected_args
 
   def block_ok?
-    @actual_block == block_expected?
+    @expected_block.nil? || @actual_block == @expected_block
+  end
+
+  def block_description
+    case
+      when @expected_block == true
+        ' with a block'
+      when @expected_block == false
+        ' without a block'
+      else
+        ''
+    end
   end
 
   def block_failure_message(negated)
@@ -90,17 +104,6 @@ RSpec::Matchers.define(:delegate) do |method|
     end
   end
 
-  def block_description
-    case
-      when @expected_block == true
-        ' with a block'
-      when @expected_block == false
-        ' without a block'
-      else
-        ''
-    end
-  end
-
   def delegate?(test_delegate=delegate_double)
     if delegate_is_an_attribute?
       delegate_to_attribute?(test_delegate)
@@ -111,10 +114,6 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def nil_allowed?
     !!@nil_allowed
-  end
-
-  def block_expected?
-    !!@expected_block
   end
 
   def delegate_with_nil?

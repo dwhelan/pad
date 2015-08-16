@@ -165,11 +165,11 @@ describe 'Delegate matcher' do
 
   describe 'blocks' do
     it { should     delegate(:last_name).to(:author).with_block       }
-    it { should     delegate(:last_name).to(:author).with_block(true) }
+    it { should     delegate(:last_name).to(:author).with_a_block       }
     it { should_not delegate(:last_name).to(:author).without_block    }
+    it { should_not delegate(:last_name).to(:author).without_a_block    }
 
     it { should_not delegate(:name).to(:author).with_block            }
-    it { should     delegate(:name).to(:author).with_block(false)     }
     it { should     delegate(:name).to(:author).without_block         }
   end
 
