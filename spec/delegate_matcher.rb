@@ -40,14 +40,6 @@ RSpec::Matchers.define(:delegate) do |method|
     super + ' but' + block_failure_message(true)
   end
 
-  def block_failure_message(negated)
-    if @expected_block
-      " a block was #{negated ? '' : 'not '}passed to #{delegate}.#{method}"
-    else
-      " a block was #{negated ? 'not ' : ''}passed to #{delegate}.#{method}"
-    end
-  end
-
   chain(:to)            { |receiver|       @delegate         = receiver }
   chain(:allow_nil)     { |allow_nil=true| @nil_allowed      = allow_nil }
   chain(:via)           { |via|            @delegator_method = via }
@@ -62,6 +54,14 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def block_ok?
     @actual_block == block_expected?
+  end
+
+  def block_failure_message(negated)
+    if @expected_block
+      " a block was #{negated ? '' : 'not '}passed to #{delegate}.#{method}"
+    else
+      " a block was #{negated ? 'not ' : ''}passed to #{delegate}.#{method}"
+    end
   end
 
   def arguments_description
