@@ -3,23 +3,22 @@
 #
 # Usage:
 #
-#     describe Post do
-#       it { should delegate(:name).to(:author)   }                     # name         => author.name
-#       it { should delegate(:name).to(:@author)  }                     # name         => @author.name
+# describe Post do
+#   it { should delegate(:name).to(:author)   }                     # name         => author.name
+#   it { should delegate(:name).to(:@author)  }                     # name         => @author.name
 #
-#       it { should delegate(:name).to(:author).with_prefix }           # author_name  => author.name
-#       it { should delegate(:name).to(:author).with_prefix(:writer) }  # writer_name  => author.name
+#   it { should delegate(:name).to(:author).with_prefix }           # author_name  => author.name
+#   it { should delegate(:name).to(:author).with_prefix(:writer) }  # writer_name  => author.name
 #
-#       it { should delegate(:name).to(:author).via(:writer) }          # writer       => author.name
+#   it { should delegate(:writer).to('author.name') }               # writer       => author.name
 #
-#       it { should delegate(:name).to(:author).allow_nil   }           # name         => author && author.name
-#       it { should delegate(:name).to(:author).allow_nil(true)   }     # name         => author && author.name
-#       it { should delegate(:name).to(:author).allow_nil(false)   }    # name         => author.name
-#     end
+#   it { should delegate(:name).to(:author).allow_nil   }           # name         => author && author.name
+#   it { should delegate(:name).to(:author).allow_nil(true)   }     # name         => author && author.name
+#   it { should delegate(:name).to(:author).allow_nil(false)   }    # name         => author.name
+# end
 
 RSpec::Matchers.define(:delegate) do |method|
   match do |delegator|
-    raise 'cannot specify delegate using "with_prefix" and "via"' if @prefix && @delegator_method
     raise 'need to provide a "to"' unless @delegate
 
     @method = method
@@ -40,9 +39,9 @@ RSpec::Matchers.define(:delegate) do |method|
     super + ' but' + block_failure_message(true)
   end
 
-  chain(:to)            { |receiver|       @delegate         = receiver }
+  chain(:to)            { |delegate|
+    @delegate, @delegate_method = delegate.to_s.split('.') }
   chain(:allow_nil)     { |allow_nil=true| @nil_allowed      = allow_nil }
-  chain(:via)           { |via|            @delegator_method = via }
   chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)          { |*args|          @expected_args    = @args = args }
   chain(:and_pass)      { |*args|          @expected_args    = args }
@@ -72,7 +71,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def block_failure_message(negated)
-    @expected_block.nil? ? '' : " a block was #{negated ^ @expected_block ? 'not ' : ''}passed to #{delegate}.#{method}"
+    @expected_block.nil? ? '' : " a block was #{negated ^ @expected_block ? 'not ' : ''}passed"
   end
 
   def arguments_description
@@ -84,7 +83,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_description
-    "#{delegate}.#{method}"
+    "#{delegate}.#{delegate_method}"
   end
 
   def nil_description
@@ -125,6 +124,10 @@ RSpec::Matchers.define(:delegate) do |method|
     @delegator_method || (prefix ? :"#{prefix}_#{method}" : method)
   end
 
+  def delegate_method
+    @delegate_method || method
+  end
+
   def delegate_is_an_attribute?
     @delegate.to_s[0] == '@'
   end
@@ -154,7 +157,7 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def delegate_double
     double('delegate').tap do |delegate|
-      allow(delegate).to(receive(method)) do |*args, &block|
+      allow(delegate).to(receive(delegate_method)) do |*args, &block|
         @actual_args  = args
         @actual_block = !block.nil?
         self

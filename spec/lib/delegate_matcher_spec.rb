@@ -27,8 +27,8 @@ describe 'Delegate matcher' do
         author.name
       end
 
-      def writer
-        author.name
+      def writer(&block)
+        author.name(&block)
       end
 
       def writer_name
@@ -127,9 +127,8 @@ describe 'Delegate matcher' do
     it { should delegate(:name).to(:author).with_prefix('writer') }
   end
 
-  describe 'via' do
-    it { should delegate(:name).to(:author).via(:writer)   }
-    it { should delegate(:name).to(:author).via('writer')  }
+  describe 'with delegate method' do
+    it { should delegate(:writer).to('author.name')   }
   end
 
   describe 'allow_nil' do
@@ -192,12 +191,6 @@ describe 'Delegate matcher' do
       end
     end
 
-    it 'with both "prefix" and "via"' do
-      expect { should delegate(:name).to(:author).with_prefix.via('writer') }.to raise_error do |error|
-        expect(error.message).to match /cannot specify delegate using "with_prefix" and "via"/
-      end
-    end
-
     it 'with delegate that requires arguments' do
       expect { should delegate(:name).to(:name_with_salutation) }.to raise_error do |error|
         expect(error.message).to match /name_with_salutation method does not have zero or -1 arity/
@@ -216,61 +209,61 @@ describe 'Delegate matcher' do
     subject       { eval matcher }
     before        { subject.matches? post }
 
-    context('delegate(:name).to(:author)') do
+    context 'delegate(:name).to(:author)' do
       its(:description)                  { should eq 'delegate name to author.name' }
       its(:failure_message)              { should match /expected .* to delegate name to author.name/ }
       its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name/ }
     end
 
-    context('delegate(:name).to(:@author)') do
+    context 'delegate(:name).to(:@author)' do
       its(:description) { should eq 'delegate name to @author.name' }
     end
 
-    context('delegate(:name).to(:author).with_prefix') do
+    context 'delegate(:name).to(:author).with_prefix' do
       its(:description) { should eq 'delegate author_name to author.name' }
     end
 
-    context('delegate(:name).to(:author).with_prefix("writer")') do
+    context 'delegate(:name).to(:author).with_prefix("writer")' do
       its(:description) { should eq 'delegate writer_name to author.name' }
     end
 
-    context('delegate(:name).to(:author).via("writer")') do
-      its(:description) { should eq 'delegate writer to author.name' }
-    end
-
-    context('delegate(:name).to(:author).allow_nil') do
+    context 'delegate(:name).to(:author).allow_nil' do
       its(:description) { should eq 'delegate name to author.name with nil allowed' }
     end
 
-    context('delegate(:name).to(:author).allow_nil(true)') do
+    context 'delegate(:name).to(:author).allow_nil(true)' do
       its(:description) { should eq 'delegate name to author.name with nil allowed' }
     end
 
-    context('delegate(:name).to(:author).allow_nil(false)') do
+    context 'delegate(:name).to(:author).allow_nil(false)' do
       its(:description) { should eq 'delegate name to author.name with nil not allowed' }
     end
 
     context 'with arguments' do
-      context('delegate(:name_with_salutation).to(:author).with("Ms.")') do
+      context 'delegate(:name_with_salutation).to(:author).with("Ms.")' do
         its(:description) { should eq 'delegate name_with_salutation(Ms.) to author.name_with_salutation' }
       end
 
-      context('delegate(:full_name).to(:author).with("Ms.", "Phd")') do
+      context 'delegate(:full_name).to(:author).with("Ms.", "Phd")' do
         its(:description) { should eq 'delegate full_name(Ms., Phd) to author.full_name' }
       end
     end
 
     context 'with blocks' do
-      context('delegate(:name).to(:author).with_block') do
+      context 'delegate(:name).to(:author).with_a_block' do
         its(:description)                  { should eq 'delegate name to author.name with a block' }
-        its(:failure_message)              { should match /expected .* to delegate name to author.name with a block but a block was not passed to author.name/ }
-        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name with a block but a block was passed to author.name/ }
+        its(:failure_message)              { should match /expected .* to delegate name to author.name with a block but a block was not passed/ }
+        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name with a block but a block was passed/ }
       end
 
-      context('delegate(:name).to(:author).without_block') do
+      context 'delegate(:name).to(:author).without_a_block' do
         its(:description)                  { should eq 'delegate name to author.name without a block' }
-        its(:failure_message)              { should match /expected .* to delegate name to author.name without a block but a block was passed to author.name/ }
-        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name without a block but a block was not passed to author.name/ }
+        its(:failure_message)              { should match /expected .* to delegate name to author.name without a block but a block was passed/ }
+        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name without a block but a block was not passed/ }
+      end
+
+      context 'delegate(:writer).to("author.name").with_a_block' do
+        its(:description)                  { should eq 'delegate writer to author.name with a block' }
       end
     end
   end
