@@ -156,14 +156,16 @@ describe 'Delegate matcher' do
     end
   end
 
-  describe 'arguments' do
+  describe 'with arguments' do
     it { should delegate(:name_with_salutation).to(:author).with('Ms.')                      } # single argument
     it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')                          } # multiple arguments
     it { should delegate(:name_with_address).to(:author).with('123 Main St.')                } # optional arguments
     it { should delegate(:name_with_address).to(:author).with('123 Main St.', 'Springfield') } # optional arguments
+
+    it { should delegate(:name_with_salutation).to(:author).with('Ms.').and_pass('Ms')       } # single argument
   end
 
-  describe 'blocks' do
+  describe 'with blocks' do
     it { should     delegate(:last_name).to(:author).with_block       }
     it { should     delegate(:last_name).to(:author).with_a_block       }
     it { should_not delegate(:last_name).to(:author).without_block    }
@@ -215,57 +217,61 @@ describe 'Delegate matcher' do
     before        { subject.matches? post }
 
     context('delegate(:name).to(:author)') do
-      its(:description)                  { should eq 'delegate name to its author' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author/ }
+      its(:description)                  { should eq 'delegate name to author.name' }
+      its(:failure_message)              { should match /expected .* to delegate name to author.name/ }
+      its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name/ }
     end
 
     context('delegate(:name).to(:@author)') do
-      its(:description) { should eq 'delegate name to its @author' }
+      its(:description) { should eq 'delegate name to @author.name' }
     end
 
     context('delegate(:name).to(:author).with_prefix') do
-      its(:description) { should eq 'delegate name to its author with prefix author' }
+      its(:description) { should eq 'delegate author_name to author.name' }
     end
 
     context('delegate(:name).to(:author).with_prefix("writer")') do
-      its(:description) { should eq 'delegate name to its author with prefix writer' }
+      its(:description) { should eq 'delegate writer_name to author.name' }
     end
 
     context('delegate(:name).to(:author).via("writer")') do
-      its(:description) { should eq 'delegate name to its author via writer' }
-    end
-
-    context('delegate(:name_with_salutation).to(:author).with("Ms.")') do
-      its(:description) { should eq 'delegate name_with_salutation with arguments Ms. to its author' }
-    end
-
-    context('delegate(:full_name).to(:author).with("Ms.", "Phd")') do
-      its(:description) { should eq 'delegate full_name with arguments Ms., Phd to its author' }
+      its(:description) { should eq 'delegate writer to author.name' }
     end
 
     context('delegate(:name).to(:author).allow_nil') do
-      its(:description) { should eq 'delegate name to its author with nil allowed' }
+      its(:description) { should eq 'delegate name to author.name with nil allowed' }
     end
 
     context('delegate(:name).to(:author).allow_nil(true)') do
-      its(:description) { should eq 'delegate name to its author with nil allowed' }
+      its(:description) { should eq 'delegate name to author.name with nil allowed' }
     end
 
     context('delegate(:name).to(:author).allow_nil(false)') do
-      its(:description) { should eq 'delegate name to its author with nil not allowed' }
+      its(:description) { should eq 'delegate name to author.name with nil not allowed' }
     end
 
-    context('delegate(:name).to(:author).with_block') do
-      its(:description)                  { should eq 'delegate name to its author with a block' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author with a block but a block was not passed to author.name/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author with a block but a block was passed to author.name/ }
+    context 'with arguments' do
+      context('delegate(:name_with_salutation).to(:author).with("Ms.")') do
+        its(:description) { should eq 'delegate name_with_salutation(Ms.) to author.name_with_salutation' }
+      end
+
+      context('delegate(:full_name).to(:author).with("Ms.", "Phd")') do
+        its(:description) { should eq 'delegate full_name(Ms., Phd) to author.full_name' }
+      end
     end
 
-    context('delegate(:name).to(:author).without_block') do
-      its(:description)                  { should eq 'delegate name to its author without a block' }
-      its(:failure_message)              { should match /expected .* to delegate name to its author without a block but a block was passed to author.name/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to its author without a block but a block was not passed to author.name/ }
+    context 'with blocks' do
+      context('delegate(:name).to(:author).with_block') do
+        its(:description)                  { should eq 'delegate name to author.name with a block' }
+        its(:failure_message)              { should match /expected .* to delegate name to author.name with a block but a block was not passed to author.name/ }
+        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name with a block but a block was passed to author.name/ }
+      end
+
+      context('delegate(:name).to(:author).without_block') do
+        its(:description)                  { should eq 'delegate name to author.name without a block' }
+        its(:failure_message)              { should match /expected .* to delegate name to author.name without a block but a block was passed to author.name/ }
+        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name without a block but a block was not passed to author.name/ }
+      end
     end
   end
 end

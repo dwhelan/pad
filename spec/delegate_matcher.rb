@@ -29,7 +29,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   description do
-    "delegate #{method}#{arguments_description} to its #{delegation_description}#{nil_description}#{block_description}"
+    "delegate #{delegator_description} to #{delegate_description}#{nil_description}#{block_description}"
   end
 
   def failure_message
@@ -44,7 +44,8 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:allow_nil)     { |allow_nil=true| @nil_allowed      = allow_nil }
   chain(:via)           { |via|            @delegator_method = via }
   chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)          { |*args|          @expected_args    = args }
+  chain(:with)          { |*args|          @expected_args    = @args = args }
+  chain(:and_pass)      { |*args|          @expected_args    = args }
   chain(:with_block)    {                  @expected_block   = true  }
   chain(:without_block) {                  @expected_block   = false }
 
@@ -71,26 +72,19 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def block_failure_message(negated)
-    if @expected_block
-      " a block was #{negated ? '' : 'not '}passed to #{delegate}.#{method}"
-    else
-      " a block was #{negated ? 'not ' : ''}passed to #{delegate}.#{method}"
-    end
+    @expected_block.nil? ? '' : " a block was #{negated ^ @expected_block ? 'not ' : ''}passed to #{delegate}.#{method}"
   end
 
   def arguments_description
-    expected_args ? " with arguments #{expected_args.join ', '}" : ''
+    @args ? "(#{expected_args.join ', '})" : ''
   end
 
-  def delegation_description
-    delegate.to_s + case
-      when @delegator_method
-        " via #{@delegator_method}"
-      when @prefix
-        " with prefix #{@prefix}"
-      else
-        ''
-    end
+  def delegator_description
+    "#{delegator_method}#{arguments_description}"
+  end
+
+  def delegate_description
+    "#{delegate}.#{method}"
   end
 
   def nil_description
@@ -156,7 +150,7 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def delegate_called?
     if expected_args
-      delegator.send(delegator_method, *expected_args) {} == :called
+      delegator.send(delegator_method, *@args) {} == :called
     else
       delegator.send(delegator_method)        {} == :called
     end
@@ -165,17 +159,12 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_double
-    delegate = Object.new
-
-    call = receive(method)
-    call = call.with(*expected_args)  if expected_args
-
-    allow(delegate).to(call.and_wrap_original) do |original_method, *args, &block|
-      @actual_args  = args
-      @actual_block = !block.nil?
-      :called
+    Object.new.tap do |delegate|
+      allow(delegate).to(receive(method)) do |*args, &block|
+        @actual_args  = args
+        @actual_block = !block.nil?
+        :called
+      end
     end
-
-    delegate
   end
 end
