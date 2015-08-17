@@ -164,14 +164,20 @@ describe 'Delegate matcher' do
     it { should delegate(:name_with_salutation).to(:author).with('Ms.').and_pass('Ms')       } # single argument
   end
 
-  describe 'with blocks' do
-    it { should     delegate(:last_name).to(:author).with_block       }
-    it { should     delegate(:last_name).to(:author).with_a_block       }
-    it { should_not delegate(:last_name).to(:author).without_block    }
-    it { should_not delegate(:last_name).to(:author).without_a_block    }
+  describe 'with a block' do
+    it { should delegate(:last_name).to(:author).with_a_block }
+    it { should delegate(:last_name).to(:author).with_block   }
 
-    it { should_not delegate(:name).to(:author).with_block            }
-    it { should     delegate(:name).to(:author).without_block         }
+    it { should_not delegate(:name).to(:author).with_a_block }
+    it { should_not delegate(:name).to(:author).with_block   }
+  end
+
+  describe 'without a block' do
+    it { should     delegate(:name).to(:author).without_a_block }
+    it { should_not delegate(:name).to(:author).with_block      }
+    #
+    it { should_not delegate(:last_name).to(:author).without_block   }
+    it { should_not delegate(:last_name).to(:author).without_a_block }
   end
 
   describe 'arguments and blocks' do
@@ -263,7 +269,11 @@ describe 'Delegate matcher' do
       end
 
       context 'delegate(:writer).to("author.name").with_a_block' do
-        its(:description)                  { should eq 'delegate writer to author.name with a block' }
+        its(:description) { should eq 'delegate writer to author.name with a block' }
+      end
+
+      context 'delegate(:writer).to("author.name").without_a_block' do
+        its(:description) { should eq 'delegate writer to author.name without a block' }
       end
     end
   end
@@ -272,3 +282,4 @@ end
 # error if args not passed correctly to delegate (extra, missing, etc)
 # treat arg mismatch as a match failure rather than an exception
 # handle default arguments supplied by delegator
+# ensure passed block is the right block

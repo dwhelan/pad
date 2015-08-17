@@ -12,6 +12,9 @@
 #
 #   it { should delegate(:writer).to('author.name') }               # writer       => author.name
 #
+#   it { should delegate(:name).to(:author).with_a_block  }         # name(&block) => author.name(&block)
+#   it { should delegate(:name).to(:author).without_a_block  }      # name(&block) => author.name
+#
 #   it { should delegate(:name).to(:author).allow_nil   }           # name         => author && author.name
 #   it { should delegate(:name).to(:author).allow_nil(true)   }     # name         => author && author.name
 #   it { should delegate(:name).to(:author).allow_nil(false)   }    # name         => author.name
@@ -32,31 +35,41 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def failure_message
-    super + ' but' + block_failure_message(false)
+    "#{super} but#{failure_message_details(false)}"
   end
 
   def failure_message_when_negated
-    super + ' but' + block_failure_message(true)
+    "#{super} but#{failure_message_details(true)}"
   end
 
-  chain(:to)            { |delegate|
-    @delegate, @delegate_method = delegate.to_s.split('.') }
-  chain(:allow_nil)     { |allow_nil=true| @nil_allowed      = allow_nil }
-  chain(:with_prefix)   { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)          { |*args|          @expected_args    = @args = args }
-  chain(:and_pass)      { |*args|          @expected_args    = args }
-  chain(:with_block)    {                  @expected_block   = true  }
-  chain(:without_block) {                  @expected_block   = false }
+  def failure_message_details(negated)
+    "#{block_failure_message(negated)}"
+  end
 
-  alias_method :with_a_block,    :with_block
-  alias_method :without_a_block, :without_block
+  chain(:to)              { |delegate|       @delegate, @delegate_method = delegate.to_s.split('.') }
+  chain(:allow_nil)       { |allow_nil=true| @nil_allowed      = allow_nil }
+  chain(:with_prefix)     { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:with)            { |*args|          @expected_args    = @args = args }
+  chain(:and_pass)        { |*args|          @expected_args    = args }
+  chain(:with_a_block)    {                  @expected_block   = true  }
+  chain(:without_a_block) {                  @expected_block   = false }
+
+  alias_method :with_block,    :with_a_block
+  alias_method :without_block, :without_a_block
 
   private
 
   attr_reader :method, :delegator, :delegate, :prefix, :expected_args
 
   def block_ok?
-    @expected_block.nil? || @actual_block == @expected_block
+    case
+      when @expected_block == true
+        @actual_block == @block
+      when @expected_block == false
+        @actual_block.nil?
+      else
+        true
+    end
   end
 
   def block_description
@@ -152,14 +165,18 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_called?
-    delegator.send(delegator_method, *@args) {} == self
+    delegator.send(delegator_method, *@args, &block) == self
+  end
+
+  def block
+    @block ||= Proc.new {}
   end
 
   def delegate_double
     double('delegate').tap do |delegate|
       allow(delegate).to(receive(delegate_method)) do |*args, &block|
         @actual_args  = args
-        @actual_block = !block.nil?
+        @actual_block = block
         self
       end
     end
