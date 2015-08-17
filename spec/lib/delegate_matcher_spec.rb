@@ -134,6 +134,9 @@ describe 'Delegate matcher' do
 
   describe 'with delegate method' do
     it { should delegate(:writer).to('author.name')   }
+    it { should delegate(:writer).to(:'author.name')  }
+    it { should delegate(:writer).to('@author.name')  }
+    it { should delegate(:writer).to(:'@author.name') }
   end
 
   describe 'allow_nil' do

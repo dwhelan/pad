@@ -5,11 +5,13 @@
 #
 # describe Post do
 #   it { should delegate(:name).to(:author)   }                     # name         => author.name
+#   it { should delegate(:name).to('author.name') }                 # name         => author.name
+#
 #   it { should delegate(:name).to(:@author)  }                     # name         => @author.name
+#   it { should delegate(:name).to('@author.name') }                # name         => author.name
 #
 #   it { should delegate(:name).to(:author).with_prefix }           # author_name  => author.name
 #   it { should delegate(:name).to(:author).with_prefix(:writer) }  # writer_name  => author.name
-#
 #   it { should delegate(:writer).to('author.name') }               # writer       => author.name
 #
 #   it { should delegate(:name).to(:author).with_a_block  }         # name(&block) => author.name(&block)
@@ -24,7 +26,7 @@ RSpec::Matchers.define(:delegate) do |method|
   match do |delegator|
     raise 'need to provide a "to"' unless @delegate
 
-    @method = method
+    @method    = method
     @delegator = delegator
 
     delegate? && delegate_with_nil? && block_ok?
