@@ -19,6 +19,11 @@ describe 'Delegate matcher' do
         author.last_name(&block)
       end
 
+      def last_name_with_wrong_block(&block)
+        different_block = Proc.new {}
+        author.last_name(&different_block)
+      end
+
       def name
         author.name
       end
@@ -170,6 +175,8 @@ describe 'Delegate matcher' do
 
     it { should_not delegate(:name).to(:author).with_a_block }
     it { should_not delegate(:name).to(:author).with_block   }
+
+    it { should_not delegate(:last_name_with_wrong_block).to('author.last_name').with_a_block }
   end
 
   describe 'without a block' do
@@ -260,6 +267,10 @@ describe 'Delegate matcher' do
         its(:description)                  { should eq 'delegate name to author.name with a block' }
         its(:failure_message)              { should match /expected .* to delegate name to author.name with a block but a block was not passed/ }
         its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name with a block but a block was passed/ }
+      end
+
+      context 'delegate(:last_name_with_wrong_block).to("author.last_name").with_a_block' do
+        its(:failure_message)              { should match /expected .* to delegate last_name_with_wrong_block to author.last_name with a block but a different block .+ was passed/ }
       end
 
       context 'delegate(:name).to(:author).without_a_block' do
