@@ -182,9 +182,11 @@ describe 'Delegate matcher' do
   describe 'without a block' do
     it { should     delegate(:name).to(:author).without_a_block }
     it { should_not delegate(:name).to(:author).with_block      }
-    #
+
     it { should_not delegate(:last_name).to(:author).without_block   }
     it { should_not delegate(:last_name).to(:author).without_a_block }
+
+    it { should_not delegate(:last_name_with_wrong_block).to('author.last_name').without_a_block }
   end
 
   describe 'arguments and blocks' do
@@ -270,7 +272,11 @@ describe 'Delegate matcher' do
       end
 
       context 'delegate(:last_name_with_wrong_block).to("author.last_name").with_a_block' do
-        its(:failure_message)              { should match /expected .* to delegate last_name_with_wrong_block to author.last_name with a block but a different block .+ was passed/ }
+        its(:failure_message) { should match /expected .* to delegate last_name_with_wrong_block to author.last_name with a block but a different block .+ was passed/ }
+      end
+
+      context 'delegate(:last_name_with_wrong_block).to("author.last_name").without_a_block' do
+        its(:failure_message) { should match /expected .* to delegate last_name_with_wrong_block to author.last_name without a block but a block was passed/ }
       end
 
       context 'delegate(:name).to(:author).without_a_block' do
@@ -293,4 +299,3 @@ end
 # error if args not passed correctly to delegate (extra, missing, etc)
 # treat arg mismatch as a match failure rather than an exception
 # handle default arguments supplied by delegator
-# ensure passed block is the right block
