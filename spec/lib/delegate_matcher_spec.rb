@@ -44,8 +44,8 @@ describe 'Delegate matcher' do
         author.name_with_salutation(salutation)
       end
 
-      def name_with_salutation_with_bad_args(salutation)
-        author.name_with_salutation(salutation)
+      def name_with_changed_args(salutation)
+        author.name_with_salutation('Miss')
       end
 
       def full_name(salutation, credentials)
@@ -173,7 +173,7 @@ describe 'Delegate matcher' do
     it { should delegate(:name_with_address).with('123 Main St.').to(:author)                } # optional arguments
     it { should delegate(:name_with_address).with('123 Main St.', 'Springfield').to(:author) } # optional arguments
 
-    it { should delegate(:name_with_salutation_with_bad_args).with('Ms.').to('author.name_with_salutation').with('Miss')       } # single argument
+    it { should delegate(:name_with_changed_args).with('Ms.').to('author.name_with_salutation').with('Miss')  }
   end
 
   describe 'with a block' do
@@ -263,15 +263,11 @@ describe 'Delegate matcher' do
 
     context 'with arguments' do
       context 'delegate(:name_with_salutation).with("Ms.").to(:author)' do
-        its(:description) { should eq 'delegate name_with_salutation(Ms.) to author.name_with_salutation(Ms.)' }
+        its(:description) { should eq 'delegate name_with_salutation("Ms.") to author.name_with_salutation("Ms.")' }
       end
 
       context 'delegate(:full_name).with("Ms.", "Phd").to(:author)' do
-        its(:description) { should eq 'delegate full_name(Ms., Phd) to author.full_name(Ms., Phd)' }
-      end
-
-      context 'delegate(:name_with_salutation_with_bad_args).with("Ms.").to("author.name_with_salutation").with("Miss")' do
-        its(:description) { should eq 'delegate name_with_salutation_with_bad_args(Ms.) to author.name_with_salutation(Miss)' }
+        its(:description) { should eq 'delegate full_name("Ms.", "Phd") to author.full_name("Ms.", "Phd")' }
       end
     end
 
@@ -307,13 +303,4 @@ describe 'Delegate matcher' do
   end
 end
 
-xdescribe 'foo' do
-  it do
-    o = double
-    expect(o).to receive(:foo).with('bar')
-    o.foo('baz', 'z')
-  end
-end
-# error if args not passed correctly to delegate (extra, missing, etc)
-# treat arg mismatch as a match failure rather than an exception
 # handle default arguments supplied by delegator
