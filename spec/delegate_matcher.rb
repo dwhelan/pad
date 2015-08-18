@@ -51,10 +51,12 @@ RSpec::Matchers.define(:delegate) do |method|
   chain(:to)              { |delegate|       @delegate, @delegate_method = delegate.to_s.split('.') }
   chain(:allow_nil)       { |allow_nil=true| @nil_allowed      = allow_nil }
   chain(:with_prefix)     { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
-  chain(:with)            { |*args|          @expected_args    = @args = args }
-  chain(:and_pass)        { |*args|          @expected_args    = args }
   chain(:with_a_block)    {                  @expected_block   = true  }
   chain(:without_a_block) {                  @expected_block   = false }
+  chain(:with)  do |*args|
+    @expected_args = args
+    @args = args unless @args
+  end
 
   alias_method :with_block,    :with_a_block
   alias_method :without_block, :without_a_block
@@ -100,16 +102,22 @@ RSpec::Matchers.define(:delegate) do |method|
     end
   end
 
-  def arguments_description
-    @args ? "(#{expected_args.join ', '})" : ''
+  def delegator_arguments_description
+    #@args ? "(%p})" % @args : ''
+    @args ? "(#{@args.join ', '})" : ''
+  end
+
+
+  def delegate_arguments_description
+    @expected_args ? "(#{@expected_args.join ', '})" : ''
   end
 
   def delegator_description
-    "#{delegator_method}#{arguments_description}"
+    "#{delegator_method}#{delegator_arguments_description}"
   end
 
   def delegate_description
-    "#{delegate}.#{delegate_method}"
+    "#{delegate}.#{delegate_method}#{delegate_arguments_description}"
   end
 
   def nil_description

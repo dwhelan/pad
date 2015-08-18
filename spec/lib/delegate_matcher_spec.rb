@@ -44,6 +44,10 @@ describe 'Delegate matcher' do
         author.name_with_salutation(salutation)
       end
 
+      def name_with_salutation_with_bad_args(salutation)
+        author.name_with_salutation(salutation)
+      end
+
       def full_name(salutation, credentials)
         author.full_name(salutation, credentials)
       end
@@ -164,12 +168,12 @@ describe 'Delegate matcher' do
   end
 
   describe 'with arguments' do
-    it { should delegate(:name_with_salutation).to(:author).with('Ms.')                      } # single argument
-    it { should delegate(:full_name).to(:author).with('Ms.', 'Phd')                          } # multiple arguments
-    it { should delegate(:name_with_address).to(:author).with('123 Main St.')                } # optional arguments
-    it { should delegate(:name_with_address).to(:author).with('123 Main St.', 'Springfield') } # optional arguments
+    it { should delegate(:name_with_salutation).with('Ms.').to(:author)                      } # single argument
+    it { should delegate(:full_name).with('Ms.', 'Phd').to(:author)                          } # multiple arguments
+    it { should delegate(:name_with_address).with('123 Main St.').to(:author)                } # optional arguments
+    it { should delegate(:name_with_address).with('123 Main St.', 'Springfield').to(:author) } # optional arguments
 
-    it { should delegate(:name_with_salutation).to(:author).with('Ms.').and_pass('Ms')       } # single argument
+    it { should delegate(:name_with_salutation_with_bad_args).with('Ms.').to('author.name_with_salutation').with('Miss')       } # single argument
   end
 
   describe 'with a block' do
@@ -258,12 +262,16 @@ describe 'Delegate matcher' do
     end
 
     context 'with arguments' do
-      context 'delegate(:name_with_salutation).to(:author).with("Ms.")' do
-        its(:description) { should eq 'delegate name_with_salutation(Ms.) to author.name_with_salutation' }
+      context 'delegate(:name_with_salutation).with("Ms.").to(:author)' do
+        its(:description) { should eq 'delegate name_with_salutation(Ms.) to author.name_with_salutation(Ms.)' }
       end
 
-      context 'delegate(:full_name).to(:author).with("Ms.", "Phd")' do
-        its(:description) { should eq 'delegate full_name(Ms., Phd) to author.full_name' }
+      context 'delegate(:full_name).with("Ms.", "Phd").to(:author)' do
+        its(:description) { should eq 'delegate full_name(Ms., Phd) to author.full_name(Ms., Phd)' }
+      end
+
+      context 'delegate(:name_with_salutation_with_bad_args).with("Ms.").to("author.name_with_salutation").with("Miss")' do
+        its(:description) { should eq 'delegate name_with_salutation_with_bad_args(Ms.) to author.name_with_salutation(Miss)' }
       end
     end
 
@@ -299,6 +307,13 @@ describe 'Delegate matcher' do
   end
 end
 
+xdescribe 'foo' do
+  it do
+    o = double
+    expect(o).to receive(:foo).with('bar')
+    o.foo('baz', 'z')
+  end
+end
 # error if args not passed correctly to delegate (extra, missing, etc)
 # treat arg mismatch as a match failure rather than an exception
 # handle default arguments supplied by delegator
