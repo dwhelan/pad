@@ -180,44 +180,26 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def block_failure_message(negated)
-    if negated
-      case
-        when !block_ok?
-          ''
-        else
-          "a block was #{@expected_block ? '' : 'not '}passed"
-      end
-    else
-      case
-        when @expected_block == true
-          if @actual_block.nil?
-            "a block was #{negated ? '' : 'not '}passed"
-          else
-            "a different block #{@actual_block} was passed"
-          end
-        when @expected_block == false
-          "a block was #{negated ^ @expected_block ? 'not ' : ''}passed"
-        else
-          ''
-      end
+    case
+      when negated
+        block_ok? ? "a block was #{@expected_block ? '' : 'not '}passed" : ''
+      when @expected_block == true
+        @actual_block.nil? ? 'a block was not passed' : "a different block #{@actual_block} was passed"
+      when @expected_block == false
+        'a block was passed'
+      else
+        ''
     end
   end
 
   def argument_failure_message(negated)
-    if negated
-      case
-        when arguments_ok? && @expected_args
-          "was called with #{argument_description(@actual_args)}"
-        else
-          ''
-      end
-    else
-      case
-        when arguments_ok?
-          ''
-        else
-          "was called with #{argument_description(@actual_args)}"
-      end
+    case
+      when negated
+        arguments_ok? && @expected_args ? "was called with #{argument_description(@actual_args)}" : ''
+      when arguments_ok?
+        ''
+      else
+        "was called with #{argument_description(@actual_args)}"
     end
   end
 end
