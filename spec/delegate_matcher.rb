@@ -33,7 +33,7 @@ RSpec::Matchers.define(:delegate) do |method|
     @method    = method
     @delegator = delegator
 
-    delegate_with_nil? && delegate? && block_ok?
+    delegate_with_nil? && delegate? && arguments_ok? && block_ok?
   end
 
   description do
@@ -41,19 +41,19 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def failure_message
-    "#{super} but#{failure_message_details(false)}"
+    "#{super} but #{failure_message_details(false)}"
   end
 
   def failure_message_when_negated
-    "#{super} but#{failure_message_details(true)}"
+    "#{super} but #{failure_message_details(true)}"
   end
 
   chain(:to)              { |delegate|       @delegate, @delegate_method = delegate.to_s.split('.') }
   chain(:allow_nil)       { |allow_nil=true| @nil_allowed      = allow_nil }
   chain(:with_prefix)     { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
+  chain(:with)            { |*args|          @expected_args    = args; @args ||= args }
   chain(:with_a_block)    {                  @expected_block   = true  }
   chain(:without_a_block) {                  @expected_block   = false }
-  chain(:with)            { |*args|          @expected_args    = args; @args ||= args }
 
   alias_method :with_block,    :with_a_block
   alias_method :without_block, :without_a_block
@@ -109,6 +109,10 @@ RSpec::Matchers.define(:delegate) do |method|
       else
         true
     end
+  end
+
+  def arguments_ok?
+    @expected_args.nil? ? true : @actual_args.eql?(@expected_args)
   end
 
   def delegator_method
@@ -172,21 +176,48 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def failure_message_details(negated)
-    "#{block_failure_message(negated)}"
+    [argument_failure_message(negated), block_failure_message(negated)].reject(&:empty?).join(' and ')
   end
 
   def block_failure_message(negated)
-    case
-      when @expected_block == true
-        if @actual_block.nil?
-          " a block was #{negated ? '' : 'not '}passed"
+    if negated
+      case
+        when !block_ok?
+          ''
         else
-          " a different block #{@actual_block} was passed"
-        end
-      when @expected_block == false
-        " a block was #{negated ^ @expected_block ? 'not ' : ''}passed"
-      else
-        ''
+          "a block was #{@expected_block ? '' : 'not '}passed"
+      end
+    else
+      case
+        when @expected_block == true
+          if @actual_block.nil?
+            "a block was #{negated ? '' : 'not '}passed"
+          else
+            "a different block #{@actual_block} was passed"
+          end
+        when @expected_block == false
+          "a block was #{negated ^ @expected_block ? 'not ' : ''}passed"
+        else
+          ''
+      end
+    end
+  end
+
+  def argument_failure_message(negated)
+    if negated
+      case
+        when arguments_ok? && @expected_args
+          "was called with #{argument_description(@actual_args)}"
+        else
+          ''
+      end
+    else
+      case
+        when arguments_ok?
+          ''
+        else
+          "was called with #{argument_description(@actual_args)}"
+      end
     end
   end
 end

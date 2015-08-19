@@ -44,8 +44,8 @@ describe 'Delegate matcher' do
         author.name_with_salutation(salutation)
       end
 
-      def name_with_changed_args(salutation)
-        author.name_with_salutation('Miss')
+      def name_with_changed_args(salutation, &block)
+        author.name_with_salutation('Miss', &Proc.new{})
       end
 
       def full_name(salutation, credentials)
@@ -168,6 +168,7 @@ describe 'Delegate matcher' do
   end
 
   describe 'with arguments' do
+    it { should_not delegate(:name_with_changed_args).with('Ms.').to('author.name_with_salutation').with('Ms.')  }
     it { should delegate(:name_with_salutation).with('Ms.').to(:author)                      } # single argument
     it { should delegate(:full_name).with('Ms.', 'Phd').to(:author)                          } # multiple arguments
     it { should delegate(:name_with_address).with('123 Main St.').to(:author)                } # optional arguments
@@ -262,8 +263,14 @@ describe 'Delegate matcher' do
     end
 
     context 'with arguments' do
-      context 'delegate(:name_with_salutation).with("Ms.").to(:author)' do
-        its(:description) { should eq 'delegate name_with_salutation("Ms.") to author.name_with_salutation("Ms.")' }
+      context 'delegate(:name_with_changed_args).with("Ms.").to("author.name_with_salutation")' do
+        its(:description)                  { should eq 'delegate name_with_changed_args("Ms.") to author.name_with_salutation("Ms.")' }
+        its(:failure_message)              { should match /but was called with \("Miss"\)/ }
+      end
+
+      context 'delegate(:name_with_changed_args).with("Ms.").to("author.name_with_salutation").with("Miss")' do
+        its(:description)                  { should eq 'delegate name_with_changed_args("Ms.") to author.name_with_salutation("Miss")' }
+        its(:failure_message_when_negated) { should match /but was called with \("Miss"\)/ }
       end
 
       context 'delegate(:full_name).with("Ms.", "Phd").to(:author)' do
@@ -271,36 +278,65 @@ describe 'Delegate matcher' do
       end
     end
 
-    context 'with blocks' do
+    context 'with a block' do
       context 'delegate(:name).to(:author).with_a_block' do
-        its(:description)                  { should eq 'delegate name to author.name with a block' }
-        its(:failure_message)              { should match /expected .* to delegate name to author.name with a block but a block was not passed/ }
-        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name with a block but a block was passed/ }
+        its(:description)     { should eq 'delegate name to author.name with a block' }
+        its(:failure_message) { should match /but a block was not passed/ }
       end
 
       context 'delegate(:last_name_with_wrong_block).to("author.last_name").with_a_block' do
-        its(:failure_message) { should match /expected .* to delegate last_name_with_wrong_block to author.last_name with a block but a different block .+ was passed/ }
+        its(:failure_message) { should match /but a different block .+ was passed/ }
+      end
+
+      context 'delegate(:last_name).to(:author).with_a_block' do
+        its(:failure_message_when_negated) { should match /but a block was passed/ }
+      end
+
+      context 'and arguments' do
+        context 'delegate(:name_with_changed_args).with("Ms.").to("author.name_with_salutation").with_a_block' do
+          its(:description)     { should eq 'delegate name_with_changed_args("Ms.") to author.name_with_salutation("Ms.") with a block' }
+          its(:failure_message) { should match /but was called with \("Miss"\) / }
+          its(:failure_message) { should match /and a different block .+ was passed/ }
+        end
+
+        context 'delegate(:middle_name).to(:author).with(true).with_block' do
+          its(:description) { should eq 'delegate middle_name(true) to author.middle_name(true) with a block' }
+          its(:failure_message_when_negated) { should match /but was called with \(true\) / }
+          its(:failure_message_when_negated) { should match /and a block was passed/ }
+        end
+      end
+    end
+
+    context 'without a block' do
+      context 'delegate(:name).to(:author).without_a_block' do
+        its(:description)     { should eq 'delegate name to author.name without a block' }
+        its(:failure_message) { should match /but a block was passed/ }
       end
 
       context 'delegate(:last_name_with_wrong_block).to("author.last_name").without_a_block' do
-        its(:failure_message) { should match /expected .* to delegate last_name_with_wrong_block to author.last_name without a block but a block was passed/ }
+        its(:failure_message) { should match /but a block was passed/ }
       end
 
       context 'delegate(:name).to(:author).without_a_block' do
-        its(:description)                  { should eq 'delegate name to author.name without a block' }
-        its(:failure_message)              { should match /expected .* to delegate name to author.name without a block but a block was passed/ }
-        its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name without a block but a block was not passed/ }
+        its(:failure_message_when_negated) { should match /but a block was not passed/ }
       end
 
-      context 'delegate(:writer).to("author.name").with_a_block' do
-        its(:description) { should eq 'delegate writer to author.name with a block' }
-      end
-
-      context 'delegate(:writer).to("author.name").without_a_block' do
-        its(:description) { should eq 'delegate writer to author.name without a block' }
+      context 'and arguments' do
+        context 'delegate(:name_with_changed_args).to("author.name_with_salutation").with("Miss").without_a_block' do
+          its(:description)     { should eq 'delegate name_with_changed_args("Miss") to author.name_with_salutation("Miss") without a block' }
+          its(:failure_message) { should match /but a block was passed/ }
+        end
+        context 'delegate(:name_with_salutation).to(:author).with("Miss").without_a_block' do
+          its(:description)     { should eq 'delegate name_with_salutation("Miss") to author.name_with_salutation("Miss") without a block' }
+          its(:failure_message_when_negated) { should match /but was called with \("Miss"\) / }
+          its(:failure_message_when_negated) { should match /and a block was not passed/ }
+        end
       end
     end
   end
 end
 
 # handle default arguments supplied by delegator
+# works with rails delegator
+# works with regular ruby delegator
+#
