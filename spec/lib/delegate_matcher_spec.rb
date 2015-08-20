@@ -118,13 +118,11 @@ describe 'Delegate matcher' do
   end
 
   describe 'delegation' do
-    it { should delegate(:name).to(:author)   }
-    it { should delegate(:name).to('author')  }
-    it { should delegate(:name).to(:@author)  }
-    it { should delegate(:name).to('@author') }
-
-    it { should_not delegate(:age).to(:author)  }
-    it { should_not delegate(:age).to(:@author) }
+    [:author,  'author',  :'author.name',  'author.name',
+     :@author, '@author', :'@author.name', '@author.name'].each do |delegate|
+      it { should     delegate(:name).to(delegate)   }
+      it { should_not delegate(:age).to(delegate) }
+    end
   end
 
   describe 'with_prefix' do
@@ -141,26 +139,18 @@ describe 'Delegate matcher' do
   end
 
   describe 'allow_nil' do
-    context 'when delegator does not check that delegate is nil' do
-      it { should     delegate(:name).to(:author).allow_nil(false) }
-      it { should_not delegate(:name).to(:author).allow_nil(true)  }
-      it { should_not delegate(:name).to(:author).allow_nil        }
-
-      it { should     delegate(:name).to(:@author).allow_nil(false) }
-      it { should_not delegate(:name).to(:@author).allow_nil(true)  }
-      it { should_not delegate(:name).to(:@author).allow_nil        }
-    end
-
-    context 'when delegator does check that delegate is nil' do
+    context 'when delegator checks that delegate is nil' do
       before { post.author = nil }
 
       it { should_not delegate(:name_with_nil_check).to(:author).allow_nil(false) }
       it { should     delegate(:name_with_nil_check).to(:author).allow_nil(true)  }
       it { should     delegate(:name_with_nil_check).to(:author).allow_nil        }
+    end
 
-      it { should_not delegate(:name_with_nil_check).to(:@author).allow_nil(false) }
-      it { should     delegate(:name_with_nil_check).to(:@author).allow_nil(true)  }
-      it { should     delegate(:name_with_nil_check).to(:@author).allow_nil        }
+    context 'when delegator does not check that delegate is nil' do
+      it { should     delegate(:name).to(:author).allow_nil(false) }
+      it { should_not delegate(:name).to(:author).allow_nil(true)  }
+      it { should_not delegate(:name).to(:author).allow_nil        }
     end
   end
 
@@ -244,16 +234,31 @@ describe 'Delegate matcher' do
       its(:description) { should eq 'delegate writer_name to author.name' }
     end
 
-    context 'delegate(:name).to(:author).allow_nil' do
-      its(:description) { should eq 'delegate name to author.name with nil allowed' }
+    context 'with allow_nil true' do
+      context 'delegate(:name).to(:author).allow_nil' do
+        its(:description)     { should eq 'delegate name to author.name with nil allowed' }
+        its(:failure_message) { should match /but author was not allowed to be nil/ }
+      end
+
+      context 'delegate(:name).to(:author).allow_nil(true)' do
+        its(:description)     { should eq 'delegate name to author.name with nil allowed' }
+        its(:failure_message) { should match /but author was not allowed to be nil/ }
+      end
+
+      context 'delegate(:name_with_nil_check).to(:author).allow_nil' do
+        its(:failure_message_when_negated) { should match /but author was allowed to be nil/ }
+      end
     end
 
-    context 'delegate(:name).to(:author).allow_nil(true)' do
-      its(:description) { should eq 'delegate name to author.name with nil allowed' }
-    end
+    context 'with allow_nil false' do
+      context 'delegate(:name_with_nil_check).to(:author).allow_nil(false)' do
+        its(:description)     { should eq 'delegate name_with_nil_check to author.name_with_nil_check with nil not allowed' }
+        its(:failure_message) { should match /but author was allowed to be nil/ }
+      end
 
-    context 'delegate(:name).to(:author).allow_nil(false)' do
-      its(:description) { should eq 'delegate name to author.name with nil not allowed' }
+      context 'delegate(:name).to(:author).allow_nil(false)' do
+        its(:failure_message_when_negated) { should match /but author was not allowed to be nil/ }
+      end
     end
 
     context 'with arguments' do
