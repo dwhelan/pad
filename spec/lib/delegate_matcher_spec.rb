@@ -31,6 +31,10 @@ describe 'Delegate matcher' do
         author.name_with_arg(arg)
       end
 
+      def name_with_arg2(arg)
+        author.name_with_arg(arg)
+      end
+
       def name_with_default_arg(arg='The author')
         author.name_with_default_arg(arg)
       end
@@ -39,8 +43,8 @@ describe 'Delegate matcher' do
         author.name_with_multiple_args(arg1, arg2)
       end
 
-      def name_with_optional_args(*address)
-        author.name_with_optional_args(*address)
+      def name_with_optional_arg(*address)
+        author.name_with_optional_arg(*address)
       end
 
       def name_with_block(&block)
@@ -87,7 +91,7 @@ describe 'Delegate matcher' do
         "#{arg1} #{arg2} #{name}"
       end
 
-      def name_with_optional_args(*args)
+      def name_with_optional_arg(*args)
         "#{[args, name].flatten.join(' ')}"
       end
 
@@ -118,11 +122,12 @@ describe 'Delegate matcher' do
     its(:age)                   { should eq 60                }
 
     it { expect(post.name_with_arg('The author')).to               eq 'The author Catherine Asaro' }
+    it { expect(post.name_with_arg2('The author')).to               eq 'The author Catherine Asaro' }
     it { expect(post.name_with_default_arg('The famous')).to       eq 'The famous Catherine Asaro' }
     it { expect(post.name_with_multiple_args('The', 'author')).to  eq 'The author Catherine Asaro' }
-    it { expect(post.name_with_optional_args).to                   eq 'Catherine Asaro' }
-    it { expect(post.name_with_optional_args('The author')).to     eq 'The author Catherine Asaro' }
-    it { expect(post.name_with_optional_args('The', 'author')).to  eq 'The author Catherine Asaro' }
+    it { expect(post.name_with_optional_arg).to                   eq 'Catherine Asaro' }
+    it { expect(post.name_with_optional_arg('The author')).to     eq 'The author Catherine Asaro' }
+    it { expect(post.name_with_optional_arg('The', 'author')).to  eq 'The author Catherine Asaro' }
     it { expect(post.name_with_block{'The author'}).to             eq 'The author Catherine Asaro' }
     it { expect(post.name_with_arg_and_block('The'){'author'} ).to eq 'The author Catherine Asaro' }
   end
@@ -167,8 +172,8 @@ describe 'Delegate matcher' do
   describe 'with arguments' do
     it { should delegate(:name_with_arg).with('Ms.').to(:author)                                     }
     it { should delegate(:name_with_multiple_args).with('The', 'author').to(:author)                    }
-    it { should delegate(:name_with_optional_args).with('The author').to(:author)                  }
-    it { should delegate(:name_with_optional_args).with('The', 'author').to(:author)   }
+    it { should delegate(:name_with_optional_arg).with('The author').to(:author)                  }
+    it { should delegate(:name_with_optional_arg).with('The', 'author').to(:author)   }
     it { should delegate(:name_with_default_arg).to(:author)   }
     it { should delegate(:name_with_default_arg).with('The author').to(:author)   }
 
@@ -229,13 +234,21 @@ describe 'Delegate matcher' do
     before        { subject.matches? post }
 
     context 'delegate(:name).to(:author)' do
-      its(:description)                  { should eq 'delegate name to author.name' }
-      its(:failure_message)              { should match /expected .* to delegate name to author.name/ }
-      its(:failure_message_when_negated) { should match /expected .* not to delegate name to author.name/ }
+      its(:description)                  { should eq 'delegate name to author' }
+      its(:failure_message)              { should match /expected .* to delegate name to author/ }
+      its(:failure_message_when_negated) { should match /expected .* not to delegate name to author/ }
+    end
+
+    context 'delegate(:name).to(:author).with_prefix' do
+      its(:description) { should eq 'delegate author_name to author.name' }
+    end
+
+    context 'delegate(:writer).to("author.name")' do
+      its(:description) { should eq 'delegate writer to author.name' }
     end
 
     context 'delegate(:name).to(:@author)' do
-      its(:description) { should eq 'delegate name to @author.name' }
+      its(:description) { should eq 'delegate name to @author' }
     end
 
     context 'delegate(:name).to(:author).with_prefix' do
@@ -248,12 +261,12 @@ describe 'Delegate matcher' do
 
     context 'with allow_nil true' do
       context 'delegate(:name).to(:author).allow_nil' do
-        its(:description)     { should eq 'delegate name to author.name with nil allowed' }
+        its(:description)     { should eq 'delegate name to author with nil allowed' }
         its(:failure_message) { should match /but author was not allowed to be nil/ }
       end
 
       context 'delegate(:name).to(:author).allow_nil(true)' do
-        its(:description)     { should eq 'delegate name to author.name with nil allowed' }
+        its(:description)     { should eq 'delegate name to author with nil allowed' }
         its(:failure_message) { should match /but author was not allowed to be nil/ }
       end
 
@@ -264,7 +277,7 @@ describe 'Delegate matcher' do
 
     context 'with allow_nil false' do
       context 'delegate(:name_with_nil_check).to(:author).allow_nil(false)' do
-        its(:description)     { should eq 'delegate name_with_nil_check to author.name_with_nil_check with nil not allowed' }
+        its(:description)     { should eq 'delegate name_with_nil_check to author with nil not allowed' }
         its(:failure_message) { should match /but author was allowed to be nil/ }
       end
 
@@ -274,8 +287,12 @@ describe 'Delegate matcher' do
     end
 
     context 'with arguments' do
+      context 'delegate(:name_with_multiple_args).with("Ms.", "Phd").to(:author)' do
+        its(:description) { should eq 'delegate name_with_multiple_args("Ms.", "Phd") to author' }
+      end
+
       context 'delegate(:name_with_different_arg_and_block).with("Ms.").to(:author)' do
-        its(:description)     { should eq 'delegate name_with_different_arg_and_block("Ms.") to author.name_with_different_arg_and_block("Ms.")' }
+        its(:description)     { should eq 'delegate name_with_different_arg_and_block("Ms.") to author' }
         its(:failure_message) { should match /but was called with \("Miss"\)/ }
       end
 
@@ -284,14 +301,14 @@ describe 'Delegate matcher' do
         its(:failure_message_when_negated) { should match /but was called with \("Miss"\)/ }
       end
 
-      context 'delegate(:name_with_multiple_args).with("Ms.", "Phd").to(:author)' do
-        its(:description) { should eq 'delegate name_with_multiple_args("Ms.", "Phd") to author.name_with_multiple_args("Ms.", "Phd")' }
+      context 'delegate(:name_with_arg2).with("The author").to("author.name_with_arg")' do
+        its(:description) { should eq 'delegate name_with_arg2("The author") to author.name_with_arg' }
       end
     end
 
     context 'with a block' do
       context 'delegate(:name).to(:author).with_a_block' do
-        its(:description)     { should eq 'delegate name to author.name with a block' }
+        its(:description)     { should eq 'delegate name to author with a block' }
         its(:failure_message) { should match /but a block was not passed/ }
       end
 
@@ -305,7 +322,7 @@ describe 'Delegate matcher' do
 
       context 'and arguments' do
         context 'delegate(:name_with_different_arg_and_block).with("Ms.").to(:author).with_a_block' do
-          its(:description)     { should eq 'delegate name_with_different_arg_and_block("Ms.") to author.name_with_different_arg_and_block("Ms.") with a block' }
+          its(:description)     { should eq 'delegate name_with_different_arg_and_block("Ms.") to author with a block' }
           its(:failure_message) { should match /but was called with \("Miss"\) / }
           its(:failure_message) { should match /and a different block .+ was passed/ }
         end
@@ -319,7 +336,7 @@ describe 'Delegate matcher' do
 
     context 'without a block' do
       context 'delegate(:name).to(:author).without_a_block' do
-        its(:description)     { should eq 'delegate name to author.name without a block' }
+        its(:description)     { should eq 'delegate name to author without a block' }
         its(:failure_message) { should match /but a block was passed/ }
       end
 
@@ -333,7 +350,7 @@ describe 'Delegate matcher' do
 
       context 'and arguments' do
         context 'delegate(:name_with_different_arg_and_block).to(:author).with("Miss").without_a_block' do
-          its(:description)     { should eq 'delegate name_with_different_arg_and_block("Miss") to author.name_with_different_arg_and_block("Miss") without a block' }
+          its(:description)     { should eq 'delegate name_with_different_arg_and_block("Miss") to author without a block' }
           its(:failure_message) { should match /but a block was passed/ }
         end
 
@@ -347,6 +364,6 @@ describe 'Delegate matcher' do
 end
 
 # only print delegated method if method name different from delegator
-# handle default arguments supplied by delegator
+# only print failure_messages
 # works with rails delegator
 # works with regular ruby delegator

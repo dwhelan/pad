@@ -146,7 +146,14 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_description
-    "#{delegate}.#{delegate_method}#{argument_description(@expected_args)}"
+    case
+      when !@args.eql?(@expected_args)
+        "#{delegate}.#{delegate_method}#{argument_description(@expected_args)}"
+      when delegate_method.eql?(delegator_method)
+        "#{delegate}"
+      else
+        "#{delegate}.#{delegate_method}"
+    end
   end
 
   def argument_description(args)
