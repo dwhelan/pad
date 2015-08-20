@@ -41,11 +41,13 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def failure_message
-    "#{super} but #{failure_message_details(false)}"
+    message = failure_message_details(false)
+    message.empty? ? super : message
   end
 
   def failure_message_when_negated
-    "#{super} but #{failure_message_details(true)}"
+    message = failure_message_details(true)
+    message.empty? ? super : message
   end
 
   chain(:to)              { |delegate|       @delegate, @delegate_method = delegate.to_s.split('.') }
