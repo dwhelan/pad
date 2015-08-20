@@ -31,6 +31,10 @@ describe 'Delegate matcher' do
         author.name_with_arg(arg)
       end
 
+      def name_with_default_arg(arg='The author')
+        author.name_with_default_arg(arg)
+      end
+
       def name_with_multiple_args(arg1, arg2)
         author.name_with_multiple_args(arg1, arg2)
       end
@@ -75,6 +79,10 @@ describe 'Delegate matcher' do
         "#{arg} #{name}"
       end
 
+      def name_with_default_arg(arg='The author')
+        "#{arg} #{name}"
+      end
+
       def name_with_multiple_args(arg1, arg2)
         "#{arg1} #{arg2} #{name}"
       end
@@ -101,14 +109,16 @@ describe 'Delegate matcher' do
   before  { post.author = author }
 
   describe 'test support' do
-    its(:name_with_nil_check) { should eq 'Catherine Asaro' }
-    its(:name)                { should eq 'Catherine Asaro' }
-    its(:author_name)         { should eq 'Catherine Asaro' }
-    its(:writer)              { should eq 'Catherine Asaro' }
-    its(:writer_name)         { should eq 'Catherine Asaro' }
-    its(:age)                 { should eq 60                }
+    its(:name)                  { should eq 'Catherine Asaro' }
+    its(:name_with_nil_check)   { should eq 'Catherine Asaro' }
+    its(:name_with_default_arg) { should eq 'The author Catherine Asaro' }
+    its(:author_name)           { should eq 'Catherine Asaro' }
+    its(:writer)                { should eq 'Catherine Asaro' }
+    its(:writer_name)           { should eq 'Catherine Asaro' }
+    its(:age)                   { should eq 60                }
 
     it { expect(post.name_with_arg('The author')).to               eq 'The author Catherine Asaro' }
+    it { expect(post.name_with_default_arg('The famous')).to       eq 'The famous Catherine Asaro' }
     it { expect(post.name_with_multiple_args('The', 'author')).to  eq 'The author Catherine Asaro' }
     it { expect(post.name_with_optional_args).to                   eq 'Catherine Asaro' }
     it { expect(post.name_with_optional_args('The author')).to     eq 'The author Catherine Asaro' }
@@ -156,9 +166,11 @@ describe 'Delegate matcher' do
 
   describe 'with arguments' do
     it { should delegate(:name_with_arg).with('Ms.').to(:author)                                     }
-    it { should delegate(:name_with_multiple_args).with('Ms.', 'Phd').to(:author)                    }
-    it { should delegate(:name_with_optional_args).with('123 Main St.').to(:author)                  }
-    it { should delegate(:name_with_optional_args).with('123 Main St.', 'Springfield').to(:author)   }
+    it { should delegate(:name_with_multiple_args).with('The', 'author').to(:author)                    }
+    it { should delegate(:name_with_optional_args).with('The author').to(:author)                  }
+    it { should delegate(:name_with_optional_args).with('The', 'author').to(:author)   }
+    it { should delegate(:name_with_default_arg).to(:author)   }
+    it { should delegate(:name_with_default_arg).with('The author').to(:author)   }
 
     it { should     delegate(:name_with_different_arg_and_block).with('Ms.').to(:author).with('Miss') }
     it { should_not delegate(:name_with_different_arg_and_block).with('Ms.').to(:author).with('Ms.')  }
@@ -335,7 +347,6 @@ describe 'Delegate matcher' do
 end
 
 # only print delegated method if method name different from delegator
-# review nil check logic
 # handle default arguments supplied by delegator
 # works with rails delegator
 # works with regular ruby delegator
