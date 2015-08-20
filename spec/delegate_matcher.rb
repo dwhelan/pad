@@ -102,17 +102,17 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def block_ok?
     case
-    when @expected_block == true
-        @actual_block == @block
-      when @expected_block == false
-        @actual_block.nil?
-      else
+      when @expected_block.nil?
         true
+      when @expected_block
+        @actual_block == @block
+      else
+        @actual_block.nil?
     end
   end
 
   def arguments_ok?
-    @expected_args.nil? ? true : @actual_args.eql?(@expected_args)
+    @expected_args.nil? || @actual_args.eql?(@expected_args)
   end
 
   def delegator_method
@@ -128,7 +128,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def block
-    @block ||= Proc.new {}
+    @block ||= Proc.new{}
   end
 
   def delegate_double
@@ -150,28 +150,28 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def argument_description(args)
-    args ? "(#{args.map { |a| "%p" % a }.join(', ')})" : ''
+    args ? "(#{args.map { |a| '%p' % a }.join(', ')})" : ''
   end
 
   def nil_description
     case
-      when @nil_allowed == true
-        ' with nil allowed'
-      when @nil_allowed == false
-        ' with nil not allowed'
-      else
+      when @nil_allowed.nil?
         ''
+      when @nil_allowed
+        ' with nil allowed'
+      else
+        ' with nil not allowed'
     end
   end
 
   def block_description
     case
-      when @expected_block == true
-        ' with a block'
-      when @expected_block == false
-        ' without a block'
-      else
+      when @expected_block.nil?
         ''
+      when @expected_block
+        ' with a block'
+      else
+        ' without a block'
     end
   end
 
@@ -183,12 +183,12 @@ RSpec::Matchers.define(:delegate) do |method|
     case
       when negated
         block_ok? ? "a block was #{@expected_block ? '' : 'not '}passed" : ''
-      when @expected_block == true
-        @actual_block.nil? ? 'a block was not passed' : "a different block #{@actual_block} was passed"
-      when @expected_block == false
-        'a block was passed'
-      else
+      when @expected_block.nil?
         ''
+      when @expected_block
+        @actual_block.nil? ? 'a block was not passed' : "a different block #{@actual_block} was passed"
+      else
+        'a block was passed'
     end
   end
 

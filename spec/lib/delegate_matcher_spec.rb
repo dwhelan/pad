@@ -330,6 +330,7 @@ describe 'Delegate matcher' do
 end
 
 # only print delegated method if method name different from delegator
+# review nil check logic
 # handle default arguments supplied by delegator
 # works with rails delegator
 # works with regular ruby delegator
