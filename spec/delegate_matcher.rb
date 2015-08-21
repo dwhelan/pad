@@ -1,11 +1,3 @@
-def delegate_is_an_attribute?
-  @delegate.to_s[0] == '@'
-end
-
-def delegate_is_a_method
-  delegate.is_a?(String) || delegate.is_a?(Symbol)
-end
-
 # RSpec matcher to spec delegations.
 # Based on https://gist.github.com/awinograd/6158961
 #
@@ -79,13 +71,22 @@ RSpec::Matchers.define(:delegate) do |method|
   attr_reader :method, :delegator, :delegate, :prefix, :expected_args
 
   def delegate?(test_delegate=delegate_double)
-    if delegate_is_an_attribute?
-      delegate_to_attribute?(test_delegate)
-    elsif delegate_is_a_method
-      delegate_to_method?(test_delegate)
-    else
-      delegate_to_object?(test_delegate)
+    case
+      when delegate_is_an_attribute?
+        delegate_to_attribute?(test_delegate)
+      when delegate_is_a_method?
+        delegate_to_method?(test_delegate)
+      else
+        delegate_to_object?(test_delegate)
     end
+  end
+
+  def delegate_is_an_attribute?
+    @delegate.to_s[0] == '@'
+  end
+
+  def delegate_is_a_method?
+    delegate.is_a?(String) || delegate.is_a?(Symbol)
   end
 
   def delegate_to_attribute?(test_delegate)
@@ -122,10 +123,6 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_method
-    # delegate_method = nil
-    # if delegate.is_a?(String) || delegate.is_a?(Symbol)
-    #   _, @delegate_method = delegate.to_s.split('.')
-    # end
     @delegate_method || method
   end
 

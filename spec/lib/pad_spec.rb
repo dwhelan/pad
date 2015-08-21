@@ -12,9 +12,11 @@ module Pad
     end
     [:model, :entity].each do |method|
 
-      context 'delegattion', :focus do
+      context 'delegation', :focus do
         let(:options) { builder_options.dup }
+
         it { expect(Pad).to delegate(method).with(options).to(builder).with_block }
+        it { expect(Pad).to delegate(method).with(options).to(builder).without_block }
       end
 
       describe "Pad.#{method}" do
