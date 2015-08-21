@@ -66,6 +66,10 @@ describe 'Delegate matcher' do
       def age
         60
       end
+
+      def inspect
+        'post'
+      end
     end.new
   end
 
@@ -106,6 +110,10 @@ describe 'Delegate matcher' do
       def name_with_different_arg_and_block(arg, &block)
         "#{arg} #{block.call} #{name}"
       end
+
+      def inspect
+        'author'
+      end
     end.new
   end
 
@@ -132,18 +140,25 @@ describe 'Delegate matcher' do
     it { expect(post.name_with_arg_and_block('The'){'author'} ).to eq 'The author Catherine Asaro' }
   end
 
-  describe 'delegation' do
-    [:author,  'author',  :'author.name',  'author.name',
-     :@author, '@author', :'@author.name', '@author.name'].each do |delegate|
+  describe 'delegation to self method' do
+    [:author, 'author', :'author.name', 'author.name'].each do |delegate|
       it { should     delegate(:name).to(delegate)   }
       it { should_not delegate(:age).to(delegate) }
     end
   end
 
-  describe 'with_prefix' do
-    it { should delegate(:name).to(:author).with_prefix           }
-    it { should delegate(:name).to(:author).with_prefix(:writer)  }
-    it { should delegate(:name).to(:author).with_prefix('writer') }
+  describe 'delegation to attribute' do
+    [:@author, '@author', :'@author.name', '@author.name'].each do |delegate|
+      it { should     delegate(:name).to(delegate)   }
+      it { should_not delegate(:age).to(delegate) }
+    end
+  end
+
+  describe 'delegation to object' do
+    it { should delegate(:name).to(author) }
+    it { should delegate(:name).to(author).allow_nil }
+    it { should delegate(:name).to(author).allow_nil(false) }
+    # it { should_not delegate(:age).to(author) }
   end
 
   describe 'with delegate method' do
@@ -151,6 +166,12 @@ describe 'Delegate matcher' do
     it { should delegate(:writer).to(:'author.name')  }
     it { should delegate(:writer).to('@author.name')  }
     it { should delegate(:writer).to(:'@author.name') }
+  end
+
+  describe 'with_prefix' do
+    it { should delegate(:name).to(:author).with_prefix           }
+    it { should delegate(:name).to(:author).with_prefix(:writer)  }
+    it { should delegate(:name).to(:author).with_prefix('writer') }
   end
 
   describe 'allow_nil' do
@@ -362,5 +383,10 @@ describe 'Delegate matcher' do
   end
 end
 
+# works with method
+# works with object
+# works with object.method
 # works with rails delegator
 # works with regular ruby delegator
+# works with mini test
+# separate gem
