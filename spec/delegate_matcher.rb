@@ -10,6 +10,8 @@
 #   it { should delegate(:name).to(:@author) }                        # name         => @author.name
 #   it { should delegate(:name).to('@author.name') }                  # name         => author.name
 #
+#   it { should delegate(:name).to(subject.author) }                  # name         => author.name
+#
 #   it { should delegate(:name).to(:author).with_prefix }             # author_name  => author.name
 #   it { should delegate(:name).to(:author).with_prefix(:writer) }    # writer_name  => author.name
 #   it { should delegate(:writer).to('author.name') }                 # writer       => author.name
@@ -77,7 +79,7 @@ RSpec::Matchers.define(:delegate) do |method|
       when delegate_is_a_method?
         delegate_to_method?(test_delegate)
       else
-        delegate_to_object?(test_delegate)
+        delegate_to_object?
     end
   end
 
@@ -108,13 +110,9 @@ RSpec::Matchers.define(:delegate) do |method|
     delegate_called?
   end
 
-  def delegate_to_object?(test_delegate)
-    allow(delegate).to(receive(delegate_method)) do |*args, &block|
-      @actual_args  = args
-      @actual_block = block
-      self
-    end
-
+  def delegate_to_object?
+    raise 'cannot verify "allow_nil" expectations when delegating to an object' unless @nil_allowed.nil?
+    stub_delegation(delegate)
     delegate_called?
   end
 
@@ -135,12 +133,14 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_double
-    double('delegate').tap do |delegate|
-      allow(delegate).to(receive(delegate_method)) do |*args, &block|
-        @actual_args  = args
-        @actual_block = block
-        self
-      end
+    double('delegate').tap { |delegate| stub_delegation(delegate) }
+  end
+
+  def stub_delegation(delegate)
+    allow(delegate).to(receive(delegate_method)) do |*args, &block|
+      @actual_args = args
+      @actual_block = block
+      self
     end
   end
 
@@ -222,10 +222,10 @@ RSpec::Matchers.define(:delegate) do |method|
 
   def block_failure_message(negated)
     case
-      when @expected_block.nil?
+      when @expected_block.nil? || (negated ^ block_ok?)
         ''
       when negated
-        block_ok? ? "a block was #{@expected_block ? '' : 'not '}passed" : ''
+        "a block was #{@expected_block ? '' : 'not '}passed"
       when @expected_block
         @actual_block.nil? ? 'a block was not passed' : "a different block #{@actual_block} was passed"
       else

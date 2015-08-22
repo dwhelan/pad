@@ -2,86 +2,29 @@ require 'spec_helper'
 
 require_relative 'model_context'
 
-module Pad
-  shared_examples 'delegate build to' do |builder, builder_options={}|
-    block   = Proc.new {}
-    options = builder_options.merge(foo: :bar)
+describe Pad do
 
-    shared_examples 'delegate' do |delegate, method, args, block|
+  subject       { Pad }
+  let(:options) { { some: :option } }
+  let(:builder) { Class.new {def to_s; 'builder' end}.new }
 
+  [:model, :model].each do |method|
+    context 'with default builder' do
+      it { should delegate(method).with(options).to(Pad::Virtus).with_block }
     end
-    [:model, :entity].each do |method|
 
-      context 'delegation', :focus do
-        let(:options) { builder_options.dup }
+    context 'with global builder' do
+      before { Pad.config.builder = builder }
+      after  { Pad.reset }
 
-        it { expect(Pad).to delegate(method).with(options).to(builder).with_block }
-        it { expect(Pad).to delegate(method).with(options).to(builder).without_block }
-      end
+      it { expect(Pad).to delegate(method).with(options).to(builder).with_block }
+    end
 
-      describe "Pad.#{method}" do
+    context 'with specified builder' do
+      let(:options) { { builder: builder } }
 
-        context 'with no options and no block' do
-          it "should call #{builder}.#{method}({}) with no block" do
-            expect(builder).to receive(method) do |passed_options, &passed_block|
-              expect(passed_options).to eql Hash.new
-              expect(passed_block).to be_nil
-            end
-
-            Pad.send(method, builder_options.dup)
-          end
-        end
-
-        context 'with options only' do
-          it "should call #{builder}.#{method}(#{options}) with no block" do
-            expect(builder).to receive(method) do |passed_options, &passed_block|
-              expect(passed_options).to eql foo: :bar
-              expect(passed_block).to be_nil
-            end
-
-            Pad.send(method, options.dup)
-          end
-        end
-
-        context 'with block only' do
-          it "should call #{builder}.#{method}({}) with the block" do
-            expect(builder).to receive(method) do |passed_options, &passed_block|
-              expect(passed_options).to eql Hash.new
-              expect(passed_block).to be block
-            end
-
-            Pad.send(method, builder_options.dup, &block)
-          end
-        end
-
-        context 'with options and block' do
-          it "should call #{builder}.#{method}(#{options}) with the block" do
-            expect(builder).to receive(method) do |passed_options, &passed_block|
-              expect(passed_options).to eql foo: :bar
-              expect(passed_block).to be block
-            end
-
-            include Pad.send(method, options.dup, &block)
-          end
-        end
-      end
+      it { expect(Pad).to delegate(method).with(options).to(builder).with({}).with_block }
     end
   end
 
-  context 'with default builder' do
-    include_examples 'delegate build to', Pad::Virtus
-  end
-
-  builder = Class.new {def to_s; 'builder' end}.new
-
-  context 'with global configured builder' do
-    before { Pad.config.builder = builder }
-    after  { Pad.reset }
-
-    include_examples 'delegate build to', builder
-  end
-
-  context 'with builder specified in options' do
-    include_examples 'delegate build to', builder, builder: builder
-  end
 end

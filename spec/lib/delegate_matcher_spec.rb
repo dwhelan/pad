@@ -158,7 +158,7 @@ describe 'Delegate matcher' do
     it { should delegate(:name).to(author) }
     it { should delegate(:name).to(author).allow_nil }
     it { should delegate(:name).to(author).allow_nil(false) }
-    # it { should_not delegate(:age).to(author) }
+    it { should_not delegate(:age).to(author) }
   end
 
   describe 'with delegate method' do
@@ -192,6 +192,7 @@ describe 'Delegate matcher' do
 
   describe 'with arguments' do
     it { should delegate(:name_with_arg).with('Ms.').to(:author)                                     }
+    it { should delegate(:name_with_arg).with('Ms.').to(:author).with('Ms.')                                     }
     it { should delegate(:name_with_multiple_args).with('The', 'author').to(:author)                    }
     it { should delegate(:name_with_optional_arg).with('The author').to(:author)                  }
     it { should delegate(:name_with_optional_arg).with('The', 'author').to(:author)   }
@@ -247,6 +248,12 @@ describe 'Delegate matcher' do
         expect(error.message).to match /wrong number of arguments/
       end
     end
+
+    it 'with delegation to an object with "allow_nil" expectations' do
+      expect { should delegate(:name).to(author).allow_nil }.to raise_error do |error|
+        expect(error.message).to match /cannot verify "allow_nil" expectations when delegating to an object/
+      end
+    end
   end
 
   describe 'description' do
@@ -257,6 +264,11 @@ describe 'Delegate matcher' do
     context 'delegate(:name).to(:author)' do
       its(:description)                  { should eq 'delegate name to author' }
       its(:failure_message_when_negated) { should match /expected .* not to delegate name to author/ }
+    end
+
+    context 'delegate(:age).to(:author)' do
+      its(:description)     { should eq 'delegate age to author' }
+      its(:failure_message) { should match /expected .* to delegate age to author/ }
     end
 
     context 'delegate(:name).to(:author).with_prefix' do
@@ -347,7 +359,7 @@ describe 'Delegate matcher' do
           its(:failure_message) { should match /and a different block .+ was passed/ }
         end
 
-        context 'delegate(:name_with_arg_and_block).to(:author).with(true).with_block' do
+        context 'delegate(:name_with_arg_and_block).to(:author).with(true).with_a_block' do
           its(:failure_message_when_negated) { should match /was called with \(true\) / }
           its(:failure_message_when_negated) { should match /and a block was passed/ }
         end
@@ -355,8 +367,8 @@ describe 'Delegate matcher' do
     end
 
     context 'without a block' do
-      context 'delegate(:name).to(:author).without_a_block' do
-        its(:description)     { should eq 'delegate name to author without a block' }
+      context 'delegate(:name_with_block).to(:author).without_a_block' do
+        its(:description)     { should eq 'delegate name_with_block to author without a block' }
         its(:failure_message) { should match /a block was passed/ }
       end
 
@@ -383,8 +395,9 @@ describe 'Delegate matcher' do
   end
 end
 
-# works with method
-# works with object
+#- works with object
+# validate that allow_nil returns nil
+# more checks for incorrect block passed
 # works with object.method
 # works with rails delegator
 # works with regular ruby delegator

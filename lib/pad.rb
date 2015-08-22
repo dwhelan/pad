@@ -24,6 +24,7 @@ module Pad
 
     # @api private
     def build(method, options, &block)
+      options = options.dup
       builder(options).public_send(method, options, &block)
     end
 
