@@ -11,6 +11,11 @@ describe 'Delegate matcher' do
         author.name
       end
 
+      def name_with_bad_return
+        author.name_with_bad_return
+        'Ann Rand'
+      end
+
       def name_with_nil_check
         author.name_with_nil_check if author
       end
@@ -79,6 +84,10 @@ describe 'Delegate matcher' do
         'Catherine Asaro'
       end
 
+      def name_with_bad_return
+        name
+      end
+
       def name_with_nil_check
         name
       end
@@ -140,7 +149,7 @@ describe 'Delegate matcher' do
     it { expect(post.name_with_arg_and_block('The'){'author'} ).to eq 'The author Catherine Asaro' }
   end
 
-  describe 'delegation to self method' do
+  describe 'delegation to method' do
     [:author, 'author', :'author.name', 'author.name'].each do |delegate|
       it { should     delegate(:name).to(delegate)   }
       it { should_not delegate(:age).to(delegate) }
@@ -156,16 +165,12 @@ describe 'Delegate matcher' do
 
   describe 'delegation to object' do
     it { should delegate(:name).to(author) }
-    it { should delegate(:name).to(author).allow_nil }
-    it { should delegate(:name).to(author).allow_nil(false) }
+
     it { should_not delegate(:age).to(author) }
   end
 
-  describe 'with delegate method' do
-    it { should delegate(:writer).to('author.name')   }
-    it { should delegate(:writer).to(:'author.name')  }
-    it { should delegate(:writer).to('@author.name')  }
-    it { should delegate(:writer).to(:'@author.name') }
+  describe 'return value' do
+    it { should_not delegate(:name_with_bad_return).to(:author)   }
   end
 
   describe 'with_prefix' do
@@ -289,6 +294,11 @@ describe 'Delegate matcher' do
 
     context 'delegate(:name).to(:author).with_prefix("writer")' do
       its(:description) { should eq 'delegate writer_name to author.name' }
+    end
+
+    context 'delegate(:name_with_bad_return).to(:author)' do
+      its(:description)     { should eq 'delegate name_with_bad_return to author' }
+      its(:failure_message) { should match /a return value of "Ann Rand" was returned instead of the delegate return value/ }
     end
 
     context 'with allow_nil true' do

@@ -125,7 +125,8 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_called?
-    delegator.send(delegator_method, *@args, &block) == self
+    @return_value = delegator.send(delegator_method, *@args, &block)
+    @return_value == self
   end
 
   def block
@@ -137,9 +138,11 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def stub_delegation(delegate)
+    @delegated = false
     allow(delegate).to(receive(delegate_method)) do |*args, &block|
       @actual_args = args
       @actual_block = block
+      @delegated = true
       self
     end
   end
@@ -214,10 +217,32 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def failure_message_details(negated)
-    [argument_failure_message(negated),
-     block_failure_message(negated),
-     allow_nil_failure_message(negated),
+    [
+      return_value_failure_message(negated),
+      argument_failure_message(negated),
+      block_failure_message(negated),
+      allow_nil_failure_message(negated),
     ].reject(&:empty?).join(' and ')
+  end
+
+  def return_value_failure_message(negated)
+    case
+      when !@delegated || @return_value == self
+        ''
+      else
+        'a return value of %p was returned instead of the delegate return value' % @return_value
+    end
+  end
+
+  def argument_failure_message(negated)
+    case
+      when negated
+        arguments_ok? && @expected_args ? "was called with #{argument_description(@actual_args)}" : ''
+      when arguments_ok?
+        ''
+      else
+        "was called with #{argument_description(@actual_args)}"
+    end
   end
 
   def block_failure_message(negated)
@@ -230,17 +255,6 @@ RSpec::Matchers.define(:delegate) do |method|
         @actual_block.nil? ? 'a block was not passed' : "a different block #{@actual_block} was passed"
       else
         'a block was passed'
-    end
-  end
-
-  def argument_failure_message(negated)
-    case
-      when negated
-        arguments_ok? && @expected_args ? "was called with #{argument_description(@actual_args)}" : ''
-      when arguments_ok?
-        ''
-      else
-        "was called with #{argument_description(@actual_args)}"
     end
   end
 
