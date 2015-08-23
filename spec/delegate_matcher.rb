@@ -5,16 +5,17 @@
 #
 # describe Post do
 #   it { should delegate(:name).to(:author) }                         # name         => author.name
-#   it { should delegate(:name).to('author.name') }                   # name         => author.name
+#   it { should delegate(:name).to(:author).as(:name) }               # name         => author.name
 #
 #   it { should delegate(:name).to(:@author) }                        # name         => @author.name
-#   it { should delegate(:name).to('@author.name') }                  # name         => author.name
+#   it { should delegate(:name).to(:@author).as(:name) }              # name         => @author.name
 #
-#   it { should delegate(:name).to(subject.author) }                  # name         => author.name
+#   it { should delegate(:name).to(author) }                          # name         => author.name
+#   it { should delegate(:name).to(author).as(:name) }                # name         => author.name
 #
 #   it { should delegate(:name).to(:author).with_prefix }             # author_name  => author.name
 #   it { should delegate(:name).to(:author).with_prefix(:writer) }    # writer_name  => author.name
-#   it { should delegate(:writer).to('author.name') }                 # writer       => author.name
+#   it { should delegate(:writer).to(:author).as(:name) }             # writer       => author.name
 #
 #   it { should delegate(:name).with('Ms.')to(:author) }              # name('Ms.')  => author.name('Ms.')
 #   it { should delegate(:name).with('Ms.')to(:author).with('Miss') } # name('Ms.')  => author.name('Miss')

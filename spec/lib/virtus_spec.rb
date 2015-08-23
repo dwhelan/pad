@@ -1,72 +1,28 @@
 require 'spec_helper'
-# require 'shoulda/matchers/independent/delegate_method_matcher'
-require 'shoulda/matchers'
 
 module Pad
-  describe Virtus do
+  module Virtus
+    describe Virtus do
 
-    describe 'Virtus.entity' do
-      include_examples 'entity module', Virtus.entity
-    end
+      let(:options) { { some: :option } }
 
-    shared_examples 'delegate Virtus build' do |method, builder|
-      block   = Proc.new {}
-      options = { foo: :bar }
-
-      describe "Virtus.#{method}" do
-
-        context 'with no options block and no block' do
-          # it { expect(Virtus).to delegate_method(:model).as(:call) }
-          it "should call #{builder}.call({}) with no block" do
-            expect(builder).to receive(:call) do |passed_options, &passed_block|
-              expect(passed_options).to eql Hash.new
-              expect(passed_block).to be_nil
-              Module.new
-            end
-
-            Virtus.send(method)
-          end
-        end
-
-        context 'with options only' do
-          it "should call #{builder}.call(options) with no block" do
-            expect(builder).to receive(:call) do |passed_options, &passed_block|
-              expect(passed_options).to eql options
-              expect(passed_block).to be_nil
-              Module.new
-            end
-
-            Virtus.send(method, options)
-          end
-        end
-
-        context 'with block only' do
-          it "should call #{builder}.call({}) with the block" do
-            expect(builder).to receive(:call) do |passed_options, &passed_block|
-              expect(passed_options).to eql Hash.new
-              expect(passed_block).to be block
-              Module.new
-            end
-
-            Virtus.send(method, {}, &block)
-          end
-        end
-
-        context 'with options and block' do
-          it "should call #{builder}.call(options) with the block" do
-            expect(builder).to receive(:call) do |passed_options, &passed_block|
-              expect(passed_options).to eql options
-              expect(passed_block).to be block
-              Module.new
-            end
-
-            Virtus.send(method, options, &block)
-          end
-        end
+      describe 'model' do
+        it { should delegate(:model).with(options).to(ModelBuilder).as(:call).with_block }
+        it { should delegate(:model).with().       to(ModelBuilder).as(:call).with({})   }
       end
+
+      it_should_behave_like 'an entity', Class.new { include Pad::Virtus.entity }
     end
 
-    include_examples 'delegate Virtus build', :model,  Pad::Virtus::ModelBuilder
-    include_examples 'delegate Virtus build', :entity, Pad::Virtus::EntityBuilder
+    describe ModelBuilder do
+      it('should subclass Virtus::ModelBuilder') { expect(ModelBuilder.ancestors[1]).to be ::Virtus::ModelBuilder }
+    end
+
+    describe EntityBuilder do
+      it('should subclass Virtus::ModelBuilder') { expect(EntityBuilder.ancestors[1]).to be ::Virtus::ModelBuilder }
+    end
   end
 end
+
+# TODO Check for options being handled
+# TODO Check for block being handled
