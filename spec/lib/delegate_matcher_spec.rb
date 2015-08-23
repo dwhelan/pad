@@ -166,21 +166,20 @@ describe 'Delegate matcher' do
   end
 
   describe 'delegation to method' do
-    [:author, 'author', :'author.name', 'author.name'].each do |delegate|
-      it { should     delegate(:name).to(delegate)   }
-      it { should_not delegate(:age).to(delegate) }
-    end
+    it { should     delegate(:name).to(:author)   }
+    it { should     delegate(:writer).to(:author).as(:name) }
+    it { should_not delegate(:age).to(:author) }
   end
 
   describe 'delegation to attribute' do
-    [:@author, '@author', :'@author.name', '@author.name'].each do |delegate|
-      it { should     delegate(:name).to(delegate)   }
-      it { should_not delegate(:age).to(delegate) }
-    end
+    it { should     delegate(:name).to(:@author)   }
+    it { should     delegate(:writer).to(:@author).as(:name) }
+    it { should_not delegate(:age).to(:@author) }
   end
 
   describe 'delegation to object' do
     it { should delegate(:name).to(author) }
+    it { should delegate(:writer).to(author).as(:name) }
 
     it { should_not delegate(:age).to(author) }
   end
@@ -298,7 +297,7 @@ describe 'Delegate matcher' do
       its(:description) { should eq 'delegate author_name to author.name' }
     end
 
-    context 'delegate(:writer).to("author.name")' do
+    context 'delegate(:writer).to(:author).as(:name)' do
       its(:description) { should eq 'delegate writer to author.name' }
     end
 
@@ -312,6 +311,10 @@ describe 'Delegate matcher' do
 
     context 'delegate(:name).to(:author).with_prefix("writer")' do
       its(:description) { should eq 'delegate writer_name to author.name' }
+    end
+
+    context 'delegate(:writer).to(:author).as("name")' do
+      its(:description) { should eq 'delegate writer to author.name' }
     end
 
     context 'delegate(:name_with_bad_return).to(:author)' do
@@ -365,7 +368,7 @@ describe 'Delegate matcher' do
         its(:failure_message_when_negated) { should match /was called with \("Miss"\)/ }
       end
 
-      context 'delegate(:name_with_arg2).with("The author").to("author.name_with_arg")' do
+      context 'delegate(:name_with_arg2).with("The author").to(:author).as(:name_with_arg)' do
         its(:description) { should eq 'delegate name_with_arg2("The author") to author.name_with_arg' }
       end
     end

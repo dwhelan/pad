@@ -51,14 +51,8 @@ RSpec::Matchers.define(:delegate) do |method|
     message.empty? ? super : message
   end
 
-  chain(:to) do |delegate|
-    if delegate.is_a?(String) || delegate.is_a?(Symbol)
-      @delegate, @delegate_method = delegate.to_s.split('.')
-    else
-      @delegate = delegate
-    end
-  end
-
+  chain(:to)              { |delegate|       @delegate         = delegate }
+  chain(:as)              { |method|         @delegate_method  = method }
   chain(:allow_nil)       { |allow_nil=true| @nil_allowed      = allow_nil }
   chain(:with_prefix)     { |prefix=nil|     @prefix           = prefix || delegate.to_s.sub(/@/, '') }
   chain(:with)            { |*args|          @expected_args    = args; @args ||= args }
