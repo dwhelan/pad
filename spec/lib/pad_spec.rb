@@ -9,22 +9,23 @@ describe Pad do
   let(:builder) { Class.new {def to_s; 'builder' end}.new }
 
   [:model, :model].each do |method|
-    context 'with default builder' do
-      it { should delegate(method).with(options).to(Pad::Virtus).with_block }
-    end
+    describe method do
+      context 'with default builder' do
+        it { should delegate(method).with(options).to(Pad::Virtus).with_block }
+      end
 
-    context 'with global builder' do
-      before { Pad.config.builder = builder }
-      after  { Pad.reset }
+      context 'with global builder' do
+        before { Pad.config.builder = builder }
+        after  { Pad.reset }
 
-      it { expect(Pad).to delegate(method).with(options).to(builder).with_block }
-    end
+        it { expect(Pad).to delegate(method).with(options).to(builder).with_block }
+      end
 
-    context 'with specified builder' do
-      let(:options) { { builder: builder } }
+      context 'with specified builder' do
+        let(:options) { { builder: builder } }
 
-      it { expect(Pad).to delegate(method).with(options).to(builder).with({}).with_block }
+        it { expect(Pad).to delegate(method).with(options).to(builder).with({}).with_block }
+      end
     end
   end
-
 end

@@ -1,6 +1,6 @@
+require 'pad/configuration'
 require 'pad/version'
 require 'pad/entity'
-require 'pad/virtus'
 
 module Pad
 
@@ -36,19 +36,6 @@ module Pad
     # @api private
     def configuration
       @configuration ||= Configuration.new
-    end
-
-  end
-
-  class Configuration
-    # Access the finalize setting for this instance
-    attr_accessor :builder
-
-    # @api private
-    def initialize(options={})
-      @builder = options.fetch(:builder, Pad::Virtus)
-
-      yield self if block_given?
     end
 
   end

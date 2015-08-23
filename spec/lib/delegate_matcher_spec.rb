@@ -427,8 +427,7 @@ describe 'Delegate matcher' do
   end
 end
 
-# more checks for incorrect block passed
-# works with object.method
+# works with all pad delegation
 # works with rails delegator
 # works with regular ruby delegator
 # works with mini test
