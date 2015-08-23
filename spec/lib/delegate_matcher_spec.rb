@@ -20,6 +20,11 @@ describe 'Delegate matcher' do
         author.name_with_nil_check if author
       end
 
+      def name_with_nil_check_and_bad_return
+        author.name_with_nil_check_and_bad_return if author
+        'Ann Rand'
+      end
+
       def author_name
         author.name
       end
@@ -92,6 +97,10 @@ describe 'Delegate matcher' do
         name
       end
 
+      def name_with_nil_check_and_bad_return
+        'Ann Rand'
+      end
+
       def name_with_arg(arg)
         "#{arg} #{name}"
       end
@@ -147,6 +156,13 @@ describe 'Delegate matcher' do
     it { expect(post.name_with_optional_arg('The', 'author')).to   eq 'The author Catherine Asaro' }
     it { expect(post.name_with_block{'The author'}).to             eq 'The author Catherine Asaro' }
     it { expect(post.name_with_arg_and_block('The'){'author'} ).to eq 'The author Catherine Asaro' }
+
+    context 'with nil author' do
+      before { post.author = nil }
+
+      it { expect(post.name_with_nil_check).to be_nil }
+      it { expect(post.name_with_nil_check_and_bad_return).to eq 'Ann Rand' }
+    end
   end
 
   describe 'delegation to method' do
@@ -183,9 +199,11 @@ describe 'Delegate matcher' do
     context 'when delegator checks that delegate is nil' do
       before { post.author = nil }
 
-      it { should_not delegate(:name_with_nil_check).to(:author).allow_nil(false) }
       it { should     delegate(:name_with_nil_check).to(:author).allow_nil(true)  }
       it { should     delegate(:name_with_nil_check).to(:author).allow_nil        }
+
+      it { should_not delegate(:name_with_nil_check).to(:author).allow_nil(false) }
+      it { should_not delegate(:name_with_nil_check_and_bad_return).to(:author).allow_nil }
     end
 
     context 'when delegator does not check that delegate is nil' do
@@ -312,6 +330,10 @@ describe 'Delegate matcher' do
         its(:failure_message) { should match /author was not allowed to be nil/ }
       end
 
+      context 'delegate(:name_with_nil_check_and_bad_return).to(:author).allow_nil' do
+        its(:failure_message) { should match /did not return nil/ }
+      end
+
       context 'delegate(:name_with_nil_check).to(:author).allow_nil' do
         its(:failure_message_when_negated) { should match /author was allowed to be nil/ }
       end
@@ -405,8 +427,6 @@ describe 'Delegate matcher' do
   end
 end
 
-#- works with object
-# validate that allow_nil returns nil
 # more checks for incorrect block passed
 # works with object.method
 # works with rails delegator

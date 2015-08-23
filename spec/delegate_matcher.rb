@@ -29,12 +29,12 @@
 
 RSpec::Matchers.define(:delegate) do |method|
   match do |delegator|
-    raise 'need to provide a "to"' unless @delegate
+    raise 'need to provide a "to"' unless delegate
 
     @method    = method
     @delegator = delegator
 
-    delegate? && allow_nil_ok? && arguments_ok? && block_ok?
+    allow_nil_ok? && delegate? && arguments_ok? && block_ok?
   end
 
   description do
@@ -70,7 +70,8 @@ RSpec::Matchers.define(:delegate) do |method|
 
   private
 
-  attr_reader :method, :delegator, :delegate, :prefix, :expected_args
+  attr_reader :method, :delegator, :delegate, :prefix, :expected_args, :args
+  attr_reader
 
   def delegate?(test_delegate=delegate_double)
     case
@@ -84,7 +85,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_is_an_attribute?
-    @delegate.to_s[0] == '@'
+    delegate.to_s[0] == '@'
   end
 
   def delegate_is_a_method?
@@ -125,7 +126,7 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegate_called?
-    @return_value = delegator.send(delegator_method, *@args, &block)
+    @return_value = delegator.send(delegator_method, *args, &block)
     @return_value == self
   end
 
@@ -153,15 +154,16 @@ RSpec::Matchers.define(:delegate) do |method|
     begin
       @allowed_nil = true
       delegate?(nil)
+      @return_value_when_delegate_nil = @return_value
     rescue NoMethodError
       @allowed_nil = false
     end
 
-    !!@nil_allowed == @allowed_nil
+    !!@nil_allowed == @allowed_nil && @return_value_when_delegate_nil.nil?
   end
 
   def arguments_ok?
-    @expected_args.nil? || @actual_args.eql?(@expected_args)
+    expected_args.nil? || @actual_args.eql?(expected_args)
   end
 
   def block_ok?
@@ -176,13 +178,13 @@ RSpec::Matchers.define(:delegate) do |method|
   end
 
   def delegator_description
-    "#{delegator_method}#{argument_description(@args)}"
+    "#{delegator_method}#{argument_description(args)}"
   end
 
   def delegate_description
     case
-      when !@args.eql?(@expected_args)
-        "#{delegate}.#{delegate_method}#{argument_description(@expected_args)}"
+      when !args.eql?(expected_args)
+        "#{delegate}.#{delegate_method}#{argument_description(expected_args)}"
       when delegate_method.eql?(delegator_method)
         "#{delegate}"
       else
@@ -237,7 +239,7 @@ RSpec::Matchers.define(:delegate) do |method|
   def argument_failure_message(negated)
     case
       when negated
-        arguments_ok? && @expected_args ? "was called with #{argument_description(@actual_args)}" : ''
+        arguments_ok? && expected_args ? "was called with #{argument_description(@actual_args)}" : ''
       when arguments_ok?
         ''
       else
@@ -262,6 +264,8 @@ RSpec::Matchers.define(:delegate) do |method|
     case
       when @nil_allowed.nil?
         ''
+      when !@return_value_when_delegate_nil.nil?
+        'did not return nil'
       when negated
         allow_nil_ok? ? "#{delegate} was #{@nil_allowed ? '' : 'not '}allowed to be nil" : ''
       else
