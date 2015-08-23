@@ -430,9 +430,9 @@ describe 'Delegate matcher' do
   end
 end
 
-# works with all pad delegation
-# works with rails delegator
-# works with regular ruby delegator
-# works with mini test
-# separate gem
-# remove shoulda matchers
+# TODO works with all pad delegation
+# TODO works with rails delegator
+# TODO works with regular ruby delegator
+# TODO works with mini test
+# TODO separate gem
+# TODO remove shoulda matchers
