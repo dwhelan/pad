@@ -18,7 +18,8 @@ SimpleCov.start
 
 require 'pad'
 require_relative 'shared/entity_module'
-require_relative 'shared/entity'
+require_relative 'shared/entity_builder'
+# require_relative 'shared/entity'
 
 RSpec.configure do |config|
   config.color = true

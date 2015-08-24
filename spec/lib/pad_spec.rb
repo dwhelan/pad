@@ -3,16 +3,17 @@ require 'spec_helper'
 require_relative 'model_context'
 
 describe Pad do
+  subject { Pad }
 
-  subject       { Pad }
-  let(:options) { { some: :option } }
-  let(:builder) { Class.new {def to_s; 'builder' end}.new }
+  let(:options)         { { some: :option } }
+  let(:builder)         { double 'builder' }
+  let(:default_builder) { Pad.config.builder}
 
   [:model, :model].each do |method|
     describe method do
       context 'with default builder' do
-        it { should delegate(method).with(options).to(Pad::Virtus).with_block }
-        it { should delegate(method).with().to(Pad::Virtus).with({}).with_block }
+        it { should delegate(method).with(options).to(default_builder).with_block }
+        it { should delegate(method).with().to(default_builder).with({}).with_block }
       end
 
       context 'with global builder' do
@@ -31,3 +32,5 @@ describe Pad do
     end
   end
 end
+
+#TODO Test configuration
