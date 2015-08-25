@@ -1,7 +1,7 @@
 module Pad
 
-  shared_examples_for 'an entity builder' do |builder|
-    include_examples 'an entity module', builder.entity
+  shared_examples_for 'an entity builder' do
+    include_examples 'an entity module', described_class.entity
   end
 
   shared_examples_for 'an entity module' do |entity_module|

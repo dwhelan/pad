@@ -11,7 +11,8 @@ module Pad
         it { should delegate(:model).with().       to(ModelBuilder).as(:call).with({})   }
       end
 
-      it_should_behave_like 'an entity builder', Pad::Virtus
+      it_should_behave_like 'an entity builder'
+      it_should_behave_like 'a model builder'
     end
 
     describe ModelBuilder do

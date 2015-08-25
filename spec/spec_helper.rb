@@ -17,6 +17,7 @@ SimpleCov.start
 # Coveralls.wear!
 
 require 'pad'
+require_relative 'shared/model_examples'
 require_relative 'shared/entity_examples'
 # require_relative 'shared/entity_builder'
 # require_relative 'shared/entity'

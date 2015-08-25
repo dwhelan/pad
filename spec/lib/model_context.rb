@@ -62,45 +62,45 @@ module Pad
   #   end
   # end
 
-  shared_examples 'a model builder' do |method, builder|
-    it 'with no options or block' do
-      expect(builder).to receive(:call) do |options, &passed_block|
-        expect(options).to eql Hash.new
-        expect(passed_block).to be_nil
-        Module.new
-      end
-
-      Class.new { include method.call }
-    end
-
-    it 'with only options' do
-      expect(builder).to receive(:call) do |args, &passed_block|
-        expect(args).to eql foo: :bar
-        expect(passed_block).to be_nil
-        Module.new
-      end
-
-      Class.new { include method.call foo: :bar}
-    end
-
-    it 'with only a block' do
-      expect(builder).to receive(:call) do |options, &passed_block|
-        expect(options).to eql Hash.new
-        expect(passed_block.call).to eql 'foo'
-        Module.new
-      end
-
-      Class.new { include method.call { 'foo' } }
-    end
-
-    it 'with options and a block' do
-      expect(builder).to receive(:call) do |options, &passed_block|
-        expect(options).to eql foo: :bar
-        expect(passed_block.call).to eql 'foo'
-        Module.new
-      end
-
-      Class.new { include method.call(foo: :bar) { 'foo' } }
-    end
-  end
+  # shared_examples 'a model builder' do |method, builder|
+  #   it 'with no options or block' do
+  #     expect(builder).to receive(:call) do |options, &passed_block|
+  #       expect(options).to eql Hash.new
+  #       expect(passed_block).to be_nil
+  #       Module.new
+  #     end
+  #
+  #     Class.new { include method.call }
+  #   end
+  #
+  #   it 'with only options' do
+  #     expect(builder).to receive(:call) do |args, &passed_block|
+  #       expect(args).to eql foo: :bar
+  #       expect(passed_block).to be_nil
+  #       Module.new
+  #     end
+  #
+  #     Class.new { include method.call foo: :bar}
+  #   end
+  #
+  #   it 'with only a block' do
+  #     expect(builder).to receive(:call) do |options, &passed_block|
+  #       expect(options).to eql Hash.new
+  #       expect(passed_block.call).to eql 'foo'
+  #       Module.new
+  #     end
+  #
+  #     Class.new { include method.call { 'foo' } }
+  #   end
+  #
+  #   it 'with options and a block' do
+  #     expect(builder).to receive(:call) do |options, &passed_block|
+  #       expect(options).to eql foo: :bar
+  #       expect(passed_block.call).to eql 'foo'
+  #       Module.new
+  #     end
+  #
+  #     Class.new { include method.call(foo: :bar) { 'foo' } }
+  #   end
+  # end
 end
