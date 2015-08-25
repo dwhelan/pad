@@ -17,8 +17,8 @@ SimpleCov.start
 # Coveralls.wear!
 
 require 'pad'
-require_relative 'shared/entity_module'
-require_relative 'shared/entity_builder'
+require_relative 'shared/entity_examples'
+# require_relative 'shared/entity_builder'
 # require_relative 'shared/entity'
 
 RSpec.configure do |config|

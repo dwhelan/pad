@@ -1,8 +1,12 @@
 module Pad
 
+  shared_examples_for 'an entity builder' do |builder|
+    include_examples 'an entity module', builder.entity
+  end
+
   shared_examples_for 'an entity module' do |entity_module|
     let(:entity_class) { Class.new { include entity_module } }
-    let(:subclass) { Class.new(entity_class).new(id: 1) }
+    let(:subclass)     { Class.new(entity_class).new(id: 1)  }
 
     let(:entity0)  { entity_class.new id: nil }
     let(:entity0a) { entity_class.new id: nil }
