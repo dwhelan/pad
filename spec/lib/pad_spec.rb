@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require_relative 'model_context'
-
 describe Pad do
   subject { Pad }
 

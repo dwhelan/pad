@@ -4,8 +4,8 @@ module Pad
     include_examples 'an entity module', described_class.entity
   end
 
-  shared_examples_for 'an entity module' do |entity_module|
-    let(:entity_class) { Class.new { include entity_module } }
+  shared_examples_for 'an entity module' do |mod|
+    let(:entity_class) { Class.new { include mod } }
     let(:subclass)     { Class.new(entity_class).new(id: 1)  }
 
     let(:entity0)  { entity_class.new id: nil }
@@ -77,3 +77,5 @@ module Pad
     end
   end
 end
+
+# TODO Check for options being handled with entity
