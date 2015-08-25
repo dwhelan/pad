@@ -1,3 +1,5 @@
+require 'pad/virtus'
+
 require 'pad/configuration'
 require 'pad/version'
 require 'pad/entity'
@@ -5,12 +7,10 @@ require 'pad/entity'
 module Pad
 
   class << self
-    def model(options={}, &block)
-      build(:model, options, &block)
-    end
-
-    def entity(options={}, &block)
-      build(:entity, options, &block)
+    [:model, :entity, :value_object].each do |method|
+      define_method method do |options={}, &block|
+        build(method, options, &block)
+      end
     end
 
     def config(&block)

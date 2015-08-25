@@ -19,8 +19,7 @@ SimpleCov.start
 require 'pad'
 require_relative 'shared/model_examples'
 require_relative 'shared/entity_examples'
-# require_relative 'shared/entity_builder'
-# require_relative 'shared/entity'
+require_relative 'shared/value_object_examples'
 
 RSpec.configure do |config|
   config.color = true

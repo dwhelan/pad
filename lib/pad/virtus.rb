@@ -3,23 +3,20 @@ require 'virtus'
 module Pad
 
   module Virtus
-    def self.model(options={}, &block)
-      ModelBuilder.call(options, &block)
+    [:model, :value_object].each do |method|
+      define_singleton_method method do |options={}, &block|
+        ::Virtus.public_send(method, options, &block)
+      end
     end
 
     def self.entity(options={}, &block)
       EntityBuilder.call(options, &block)
     end
 
-    class ModelBuilder < ::Virtus::ModelBuilder
-    end
-
     class EntityBuilder < ::Virtus::ModelBuilder
-
       def extensions
         super + [Entity]
       end
-
     end
   end
 end
