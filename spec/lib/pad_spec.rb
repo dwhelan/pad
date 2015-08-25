@@ -7,7 +7,7 @@ describe Pad do
   let(:builder)         { double 'builder' }
   let(:default_builder) { Pad.config.builder}
 
-  [:model, :model, :value_object].each do |method|
+  [:model, :entity, :value_object].each do |method|
     describe method do
       context 'with default builder' do
         it { should delegate(method).with(options).to(default_builder).with_block }
