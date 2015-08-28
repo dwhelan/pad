@@ -2,8 +2,6 @@ require 'rspec'
 require 'coveralls'
 require 'simplecov'
 
-require 'delegate_matcher'
-
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
     SimpleCov::Formatter::HTMLFormatter,
     Coveralls::SimpleCov::Formatter
@@ -16,6 +14,9 @@ SimpleCov.start
 Coveralls.wear!
 
 require 'pad'
+
+require 'delegate_matcher'
+
 require_relative 'shared/model_examples'
 require_relative 'shared/entity_examples'
 require_relative 'shared/value_object_examples'

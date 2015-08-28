@@ -31,4 +31,4 @@ describe Pad do
   end
 end
 
-#TODO Test configuration
+# TODO: Test configuration
