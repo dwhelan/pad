@@ -1,20 +1,19 @@
 require 'rspec'
-# require 'rspec/its'
-# require 'coveralls'
-
+require 'coveralls'
 require 'simplecov'
 
-# SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
-#     SimpleCov::Formatter::HTMLFormatter,
-#     Coveralls::SimpleCov::Formatter
-# ]
+require 'delegate_matcher'
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+    SimpleCov::Formatter::HTMLFormatter,
+    Coveralls::SimpleCov::Formatter
+]
 SimpleCov.start
 
 #require 'pry'
 #require 'awesome_print'
 
-# I18n.enforce_available_locales = true
-# Coveralls.wear!
+Coveralls.wear!
 
 require 'pad'
 require_relative 'shared/model_examples'
@@ -27,4 +26,3 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 end
 
-require_relative 'delegate_matcher'
