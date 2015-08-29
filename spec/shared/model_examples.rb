@@ -5,9 +5,14 @@ module Pad
   end
 
   shared_examples 'a model module' do |mod|
-    let(:module_class) { Class.new { include mod } }
+    let(:klass) { Class.new { include mod } }
 
-    it('should have an "attribute" class method') { expect(module_class).to respond_to :attribute }
+    describe '"attribute" class method' do
+      subject { klass.method('attribute') }
+
+      it          { should_not be_nil }
+      its(:arity) { should eq(-2) }
+    end
 
     # TODO add additional model checks: attributes, mass assignment, contructor
     # TODO add optional features of model
