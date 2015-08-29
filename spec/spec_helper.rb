@@ -1,6 +1,7 @@
 require 'rspec'
 require 'coveralls'
 require 'simplecov'
+require 'rspec/its'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
     SimpleCov::Formatter::HTMLFormatter,
@@ -8,22 +9,16 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
 ]
 SimpleCov.start
 
-#require 'pry'
-#require 'awesome_print'
-
 Coveralls.wear!
 
 require 'pad'
 
 require 'delegate_matcher'
 
-require_relative 'shared/model_examples'
-require_relative 'shared/entity_examples'
-require_relative 'shared/value_object_examples'
+Dir['./spec/shared/**/*.rb'].sort.each { |f| require f}
 
 RSpec.configure do |config|
   config.color = true
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
 end
-

@@ -4,26 +4,27 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'pad/version'
 
-Gem::Specification.new do |spec|
-  spec.name          = 'pad'
-  spec.version       = Pad::VERSION
-  spec.authors       = ['Declan Whelan']
-  spec.email         = ['declan@pleanintuit.com']
-  spec.summary       = 'A light weight framework for supporting Ports & Adapters designs with Domain Driven Design'
-  spec.description   = 'A light weight framework for supporting Ports & Adapters designs with Domain Driven Design'
-  spec.homepage      = 'https://github.com/dwhelan/pad'
-  spec.license       = 'MIT'
+Gem::Specification.new do |gem|
+  gem.name          = 'pad'
+  gem.version       = Pad::VERSION
+  gem.authors       = ['Declan Whelan']
+  gem.email         = ['declan@pleanintuit.com']
+  gem.summary       = 'A light weight framework for supporting Ports & Adapters designs with Domain Driven Design'
+  gem.description   = 'A light weight framework for supporting Ports & Adapters designs with Domain Driven Design'
+  gem.homepage      = 'https://github.com/dwhelan/pad'
+  gem.license       = 'MIT'
 
-  spec.files         = `git ls-files -z`.split("\x0")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  gem.files         = `git ls-files -z`.split("\x0")
+  gem.executables   = gem.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.require_paths = ["lib"]
 
-  spec.add_dependency 'virtus', '~> 1.0'
+  gem.add_dependency 'virtus', '~> 1.0'
 
-  spec.add_development_dependency 'bundler', '         ~>  1.7'
-  spec.add_development_dependency 'rake',             '~> 10.0'
-  spec.add_development_dependency 'rspec',            '~>  3.0'
-  spec.add_development_dependency 'coveralls',        '~>  0.7'
-  spec.add_development_dependency 'delegate_matcher', '~>  0.0'
+  gem.add_development_dependency 'bundler', '         ~>  1.7'
+  gem.add_development_dependency 'coveralls',        '~>  0.7'
+  gem.add_development_dependency 'delegate_matcher', '~>  0.0'
+  gem.add_development_dependency 'rake',             '~> 10.0'
+  gem.add_development_dependency 'rspec',            '~>  3.0'
+  gem.add_development_dependency 'rspec-its',        '~>  1.1'
 end
