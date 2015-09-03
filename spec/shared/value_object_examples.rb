@@ -5,6 +5,6 @@ module Pad
   end
 
   shared_examples 'a value object module' do |mod|
-    include_examples 'a model module', described_class.value_object
+    # include_examples 'a model module', described_class.value_object
   end
 end
