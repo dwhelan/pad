@@ -15,21 +15,21 @@ describe 'have_attribute matcher' do
   describe 'attr_accessor :rw' do
     it { is_expected.to     have_attribute(:rw)            }
     it { is_expected.to     have_attribute(:rw).read_write }
-    it { is_expected.not_to have_attribute(:rw).readonly   }
-    it { is_expected.not_to have_attribute(:rw).writeonly  }
+    it { is_expected.not_to have_attribute(:rw).read_only  }
+    it { is_expected.not_to have_attribute(:rw).write_only }
   end
 
   describe 'attr_reader :r' do
     it { is_expected.to     have_attribute(:r)            }
-    it { is_expected.to     have_attribute(:r).readonly   }
-    it { is_expected.not_to have_attribute(:r).writeonly  }
+    it { is_expected.to     have_attribute(:r).read_only  }
+    it { is_expected.not_to have_attribute(:r).write_only }
     it { is_expected.not_to have_attribute(:r).read_write }
   end
 
   describe 'attr_writer :w' do
     it { is_expected.to     have_attribute(:w)            }
-    it { is_expected.to     have_attribute(:w).writeonly  }
-    it { is_expected.not_to have_attribute(:w).readonly   }
+    it { is_expected.to     have_attribute(:w).write_only }
+    it { is_expected.not_to have_attribute(:w).read_only  }
     it { is_expected.not_to have_attribute(:w).read_write }
   end
 
@@ -40,13 +40,13 @@ describe 'have_attribute matcher' do
 
     {
         :'have_attribute(:name)'            => 'have attribute :name',
-        :'have_attribute(:name).readonly'   => 'have read only attribute :name',
-        :'have_attribute(:name).writeonly'  => 'have write only attribute :name',
+        :'have_attribute(:name).read_only'   => 'have read only attribute :name',
+        :'have_attribute(:name).write_only'  => 'have write only attribute :name',
         :'have_attribute(:name).read_write' => 'have read/write attribute :name',
-        :'have_attribute(:rw).readonly'     => 'have read only attribute :rw',
-        :'have_attribute(:rw).writeonly'    => 'have write only attribute :rw',
-        :'have_attribute(:w).readonly'      => 'have read only attribute :w',
-        :'have_attribute(:r).writeonly'     => 'have write only attribute :r',
+        :'have_attribute(:rw).read_only'     => 'have read only attribute :rw',
+        :'have_attribute(:rw).write_only'    => 'have write only attribute :rw',
+        :'have_attribute(:w).read_only'      => 'have read only attribute :w',
+        :'have_attribute(:r).write_only'     => 'have write only attribute :r',
 
     }.each do |expectation, expected_description|
         describe(expectation) do
@@ -58,8 +58,8 @@ describe 'have_attribute matcher' do
 
     {
         :'have_attribute(:rw)'          => 'expected .+ not to have attribute :rw',
-        :'have_attribute(:r).readonly'  => 'expected .+ not to have read only attribute :r',
-        :'have_attribute(:w).writeonly' => 'expected .+ not to have write only attribute :w'
+        :'have_attribute(:r).read_only'  => 'expected .+ not to have read only attribute :r',
+        :'have_attribute(:w).write_only' => 'expected .+ not to have write only attribute :w'
     }.each do |expectation, expected_description|
       describe(expectation) do
         its(:failure_message_when_negated) { is_expected.to match /#{expected_description}/ }
