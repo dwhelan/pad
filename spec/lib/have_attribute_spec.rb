@@ -42,7 +42,7 @@ describe 'have_attribute matcher' do
         :'have_attribute(:name)'            => 'have attribute :name',
         :'have_attribute(:name).read_only'   => 'have read only attribute :name',
         :'have_attribute(:name).write_only'  => 'have write only attribute :name',
-        :'have_attribute(:name).read_write' => 'have read/write attribute :name',
+        :'have_attribute(:name).read_write' => 'have read write attribute :name',
         :'have_attribute(:rw).read_only'     => 'have read only attribute :rw',
         :'have_attribute(:rw).write_only'    => 'have write only attribute :rw',
         :'have_attribute(:w).read_only'      => 'have read only attribute :w',

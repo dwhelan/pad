@@ -1,45 +1,36 @@
-RSpec::Matchers.define(:have_attribute) do |attribute|
+RSpec::Matchers.define(:have_attribute) do
   match do
-    @read_only ||= false; @write_only ||= false; @read_write ||= false
-    @attribute = attribute
-    read_only_ok? && write_only_ok? && read_write_ok?
+    access_ok?
   end
 
-  chain(:read_only)  { @read_only  = true }
-  chain(:write_only) { @write_only = true }
-  chain(:read_write) { @read_write = true }
+  class << self
+
+    def chain_group(group_name, *method_names)
+      define_method :"#{group_name}_ok?" do
+        method_names.all? { |method_name| send("#{method_name}_ok?") }
+      end
+
+      define_method :"#{group_name}_description" do
+        method_names.find{ |method_name| instance_variable_get("@#{method_name}")}.to_s.gsub(/[_\/]/, ' ')
+      end
+
+      method_names.each do |method_name|
+        chain(method_name) { instance_variable_set("@#{method_name}", true) }
+
+        define_method :"#{method_name}_ok?" do
+          instance_variable_get("@#{method_name}") ? send("#{method_name}?") : true
+        end
+      end
+    end
+  end
+
+  chain_group(:access, :read_only, :write_only, :read_write);
 
   def description
-    format('have %sattribute %p', access_description, attribute)
+    format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
   end
 
   private
-
-  attr_reader :attribute
-
-  def read_only_ok?
-    if instance_variable_get(:@read_only)
-      send(:read_only?)
-    else
-      true
-    end
-  end
-
-  def read_write_ok?
-   if @read_write
-     read_write?
-   else
-     true
-   end
-  end
-
-  def write_only_ok?
-    if @write_only
-      write_only?
-    else
-      true
-    end
-  end
 
   def read_only?
     readable? && !writeable?
@@ -54,66 +45,10 @@ RSpec::Matchers.define(:have_attribute) do |attribute|
   end
 
   def readable?
-    actual.respond_to?(attribute)
+    actual.respond_to?(expected)
   end
 
   def writeable?
-    actual.respond_to?("#{attribute}=")
+    actual.respond_to?("#{expected}=")
   end
-
-  def access_description
-    case
-    when @read_write
-      'read/write '
-    when @read_only
-      'read only '
-    when @write_only
-      'write only '
-    else
-      ''
-    end
-  end
-
-  # def failure_message
-  #   super
-  #   # exists? ? failure_message_details(false, super) : super
-  # end
-  #
-  # def failure_message_when_negated
-  #   super
-  #   # exists? ? super : failure_message_details(true, super)
-  # end
-
-  # def failure_message_details(negated, default)
-  #   message = [
-  #       read_only_message(negated),
-  #   ].reject(&:empty?).join(' and ')
-  #
-  #   message.empty? ? default : message
-  # end
-
-  # def read_only_message(negated)
-  #   case
-  #   when @expected_readable.nil? || negated ^ readability_ok?
-  #     ''
-  #   when negated
-  #     'is not read only'
-  #   else
-  #     'is read only'
-  #   end
-  # end
-
-  # description do
-  #   "foo"
-  # end
-  #
-  # def failure_message
-  #   super
-  # end
-  #
-  # def failure_message_when_negated
-  #   super
-  # end
-
-
 end
