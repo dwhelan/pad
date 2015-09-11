@@ -17,7 +17,7 @@ module Pad
     it('should have an "id" attribute') { expect(entity1).to have_attributes id: 1 }
 
     describe 'hash' do
-      it('for the same entity id should be equal')       { expect(entity1.hash).to eq     entity1a.hash }
+      it('for the same entity id should be equal')       { expect(entity1.hash).to     eq entity1a.hash }
       it('for different entity ids should not be equal') { expect(entity1.hash).not_to eq entity2.hash  }
       it('for different classes should not be equal')    { expect(entity1.hash).not_to eq subclass.hash }
     end
