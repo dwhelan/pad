@@ -25,7 +25,12 @@ RSpec::Matchers.define(:have_attribute) do
   chain_group(:access, :read_only, :write_only, :read_write)
 
   def description
-    format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
+    case
+    when reader && !readable?
+      format('have %s attribute %p but the reader method %s takes %d argument(s) instead of 0', access_description, expected, expected, reader.arity).gsub(/ +/, ' ')
+    else
+      format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
+    end
   end
 
   private
