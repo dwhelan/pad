@@ -71,7 +71,8 @@ describe 'have_attribute matcher' do
     end
 
     {
-        :'have_attribute(:reader_with_args).read_only' => 'have read only attribute :reader_with_args but the reader method reader_with_args takes 1 argument\(s\) instead of 0',
+        :'have_attribute(:reader_with_args).read_only'     => 'have read only attribute :reader_with_args but reader_with_args takes 1 argument\(s\) instead of 0',
+        :'have_attribute(:writer_with_no_args).write_only' => 'have write only attribute :writer_with_no_args but writer_with_no_args= takes 0 argument\(s\) instead of 1',
 
     }.each do |expectation, expected_description|
         describe(expectation) do

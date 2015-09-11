@@ -25,12 +25,16 @@ RSpec::Matchers.define(:have_attribute) do
   chain_group(:access, :read_only, :write_only, :read_write)
 
   def description
-    case
-    when reader && !readable?
-      format('have %s attribute %p but the reader method %s takes %d argument(s) instead of 0', access_description, expected, expected, reader.arity).gsub(/ +/, ' ')
-    else
-      format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
-    end
+    details = case
+              when reader && !readable?
+                format('but %s', arity_error_description(reader, 0))
+              when writer && !writeable?
+                format('but %s', arity_error_description(writer, 1))
+              else
+                ''
+              end
+
+    format('have %s attribute %p %s', access_description, expected, details).gsub(/ +/, ' ').strip
   end
 
   private
@@ -66,5 +70,9 @@ RSpec::Matchers.define(:have_attribute) do
   def method(name)
     actual.method(name)
     rescue NameError
+  end
+
+  def arity_error_description(method, expected_arity)
+    format('%s takes %d argument(s) instead of %d', method.name, method.arity, expected_arity)
   end
 end
