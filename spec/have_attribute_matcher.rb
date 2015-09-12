@@ -17,24 +17,24 @@ class RSpec::Matchers::DSL::Matcher
   end
 end
 
-RSpec::Matchers.define(:have_attribute) do
-  match do
-    access_match?
+class RSpec::Matchers::DSL::Matcher
+  class << self
+    def failure_messages(*method_names)
+      define_method :failure_message do
+        messages = method_names.map{|m| send(m)}.compact.join(' and ')
+        messages.empty? ? super() : format('expected %s to %s but %s', actual, description, messages)
+      end
+    end
   end
+end
 
-  chain_group(:access, :read_only, :write_only, :read_write)
+RSpec::Matchers.define(:have_attribute) do
+  match { access_match? }
+
+  chain_group :access, :read_only, :write_only, :read_write
 
   def description
     format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
-  end
-
-  def failure_message
-    messages = [
-        reader_failure_message,
-        writer_failure_message
-    ].compact.join(' and ')
-
-    messages.empty? ? super : format('expected %s to %s but %s', actual, description, messages)
   end
 
   private
@@ -72,15 +72,17 @@ RSpec::Matchers.define(:have_attribute) do
     rescue NameError
   end
 
+  failure_messages :reader_failure_message, :writer_failure_message
+
   def reader_failure_message
-    arity_error_description(reader, 0) if reader && !readable?
+    arity_failure_message(reader, 0)
   end
 
   def writer_failure_message
-    arity_error_description(writer, 1) if writer && !writeable?
+    arity_failure_message(writer, 1)
   end
 
-  def arity_error_description(method, expected_arity)
-    format('%s() takes %d argument%s instead of %d', method.name, method.arity, method.arity == 1 ? '' : 's', expected_arity)
+  def arity_failure_message(method, expected_arity)
+    format('%s() takes %d argument%s instead of %d', method.name, method.arity, method.arity == 1 ? '' : 's', expected_arity) if method && method.arity != expected_arity
   end
 end
