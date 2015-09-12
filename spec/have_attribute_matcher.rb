@@ -1,3 +1,4 @@
+# Intended to be an RSpec extension for mutually exclusive chained methods
 class RSpec::Matchers::DSL::Matcher
   class << self
     def chain_group(group_name, *method_names)
@@ -17,6 +18,7 @@ class RSpec::Matchers::DSL::Matcher
   end
 end
 
+# Intended to be an RSpec extension for building failure messages
 class RSpec::Matchers::DSL::Matcher
   class << self
     def failure_messages(*method_names)
@@ -40,22 +42,22 @@ RSpec::Matchers.define(:have_attribute) do
   private
 
   def read_only_match?
-    readable? && !writeable?
+    reader_ok? && writer.nil?
   end
 
   def write_only_match?
-    !readable? && writeable?
+    writer_ok? && reader.nil?
   end
 
   def read_write_match?
-    readable? && writeable?
+    reader_ok? && writer_ok?
   end
 
-  def readable?
+  def reader_ok?
     reader && reader.arity.eql?(0)
   end
 
-  def writeable?
+  def writer_ok?
     writer && writer.arity.eql?(1)
   end
 

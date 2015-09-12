@@ -12,7 +12,7 @@ describe 'have_attribute matcher' do
 
       def one_arg(arg); end
 
-      def two_args(arg1, arg2); end
+      def two_args(arg1, arg2);  end
       def two_args=(arg1, arg2); end
     end
   end
