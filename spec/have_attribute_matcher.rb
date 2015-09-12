@@ -3,7 +3,7 @@ class RSpec::Matchers::DSL::Matcher
     def chain_group(group_name, *method_names)
       define_method :"#{group_name}_match?" do
         active_method_name = method_names.find{ |method_name| instance_variable_get("@#{method_name}")}
-        active_method_name ? send("#{active_method_name}?") : true
+        active_method_name ? send("#{active_method_name}_match?") : true
       end
 
       define_method :"#{group_name}_description" do
@@ -16,7 +16,6 @@ class RSpec::Matchers::DSL::Matcher
     end
   end
 end
-
 
 RSpec::Matchers.define(:have_attribute) do
   match do
@@ -35,24 +34,20 @@ RSpec::Matchers.define(:have_attribute) do
         writer_failure_message
     ].compact.join(' and ')
 
-    if messages.empty?
-      super
-    else
-      format('expected %s to %s but %s', actual, description, messages)
-    end
+    messages.empty? ? super : format('expected %s to %s but %s', actual, description, messages)
   end
 
   private
 
-  def read_only?
+  def read_only_match?
     readable? && !writeable?
   end
 
-  def write_only?
+  def write_only_match?
     !readable? && writeable?
   end
 
-  def read_write?
+  def read_write_match?
     readable? && writeable?
   end
 
@@ -78,14 +73,14 @@ RSpec::Matchers.define(:have_attribute) do
   end
 
   def reader_failure_message
-    format('%s', arity_error_description(reader, 0)) if reader && !readable?
+    arity_error_description(reader, 0) if reader && !readable?
   end
 
   def writer_failure_message
-    format('%s', arity_error_description(writer, 1)) if writer && !writeable?
+    arity_error_description(writer, 1) if writer && !writeable?
   end
 
   def arity_error_description(method, expected_arity)
-    format('%s takes %d argument(s) instead of %d', method.name, method.arity, expected_arity)
+    format('%s() takes %d argument%s instead of %d', method.name, method.arity, method.arity == 1 ? '' : 's', expected_arity)
   end
 end

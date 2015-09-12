@@ -73,9 +73,9 @@ describe 'have_attribute matcher' do
     end
 
     {
-        :'have_attribute(:no_args).write_only'  => 'have write only attribute :no_args but no_args= takes 0 argument\(s\) instead of 1',
-        :'have_attribute(:one_arg).read_only'   => 'have read only attribute :one_arg but one_arg takes 1 argument\(s\) instead of 0',
-        # :'have_attribute(:two_args)'           => 'have attribute :no_args but two_args takes 2 argument\(s\) instead of 0 and two_args= takes 2 argument\(s\) instead of 1',
+        :'have_attribute(:no_args).write_only' => 'have write only attribute :no_args but no_args=\(\) takes 0 arguments instead of 1',
+        :'have_attribute(:one_arg).read_only'  => 'have read only attribute :one_arg but one_arg\(\) takes 1 argument instead of 0',
+        :'have_attribute(:two_args)'           => 'have attribute :two_args but two_args\(\) takes 2 arguments instead of 0 and two_args=\(\) takes 2 arguments instead of 1',
 
     }.each do |expectation, expected_description|
         describe(expectation) do
