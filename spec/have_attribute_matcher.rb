@@ -17,6 +17,7 @@ class RSpec::Matchers::DSL::Matcher
   end
 end
 
+
 RSpec::Matchers.define(:have_attribute) do
   match do
     access_match?
@@ -25,16 +26,20 @@ RSpec::Matchers.define(:have_attribute) do
   chain_group(:access, :read_only, :write_only, :read_write)
 
   def description
-    details = case
-              when reader && !readable?
-                format('but %s', arity_error_description(reader, 0))
-              when writer && !writeable?
-                format('but %s', arity_error_description(writer, 1))
-              else
-                ''
-              end
+    format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
+  end
 
-    format('have %s attribute %p %s', access_description, expected, details).gsub(/ +/, ' ').strip
+  def failure_message
+    messages = [
+        reader_failure_message,
+        writer_failure_message
+    ].compact.join(' and ')
+
+    if messages.empty?
+      super
+    else
+      format('expected %s to %s but %s', actual, description, messages)
+    end
   end
 
   private
@@ -70,6 +75,14 @@ RSpec::Matchers.define(:have_attribute) do
   def method(name)
     actual.method(name)
     rescue NameError
+  end
+
+  def reader_failure_message
+    format('%s', arity_error_description(reader, 0)) if reader && !readable?
+  end
+
+  def writer_failure_message
+    format('%s', arity_error_description(writer, 1)) if writer && !writeable?
   end
 
   def arity_error_description(method, expected_arity)

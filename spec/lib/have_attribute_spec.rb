@@ -8,10 +8,12 @@ describe 'have_attribute matcher' do
       attr_writer   :w
       attr_accessor :rw
 
-      def reader_with_args(arg); end
+      def no_args=; end
 
-      def writer_with_no_args=;              end
-      def writer_with_two_args=(arg1, arg2); end
+      def one_arg(arg); end
+
+      def two_args(arg1, arg2); end
+      def two_args=(arg1, arg2); end
     end
   end
 
@@ -39,12 +41,12 @@ describe 'have_attribute matcher' do
   end
 
   describe 'reader should take no arguments' do
-    it { is_expected.not_to have_attribute(:reader_with_args).read_only }
+    it { is_expected.not_to have_attribute(:one_arg).read_only }
   end
 
   describe 'writer should only take one argument' do
-    it { is_expected.not_to have_attribute(:writer_with_no_args=).write_only            }
-    it { is_expected.not_to have_attribute(:writer_with_two_args=).write_only            }
+    it { is_expected.not_to have_attribute(:no_args=).write_only            }
+    it { is_expected.not_to have_attribute(:two_args=).write_only            }
   end
 
   describe 'messaging' do
@@ -71,8 +73,9 @@ describe 'have_attribute matcher' do
     end
 
     {
-        :'have_attribute(:reader_with_args).read_only'     => 'have read only attribute :reader_with_args but reader_with_args takes 1 argument\(s\) instead of 0',
-        :'have_attribute(:writer_with_no_args).write_only' => 'have write only attribute :writer_with_no_args but writer_with_no_args= takes 0 argument\(s\) instead of 1',
+        :'have_attribute(:no_args).write_only'  => 'have write only attribute :no_args but no_args= takes 0 argument\(s\) instead of 1',
+        :'have_attribute(:one_arg).read_only'   => 'have read only attribute :one_arg but one_arg takes 1 argument\(s\) instead of 0',
+        # :'have_attribute(:two_args)'           => 'have attribute :no_args but two_args takes 2 argument\(s\) instead of 0 and two_args= takes 2 argument\(s\) instead of 1',
 
     }.each do |expectation, expected_description|
         describe(expectation) do
