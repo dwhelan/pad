@@ -21,9 +21,9 @@ end
 # Intended to be an RSpec extension for building failure messages
 class RSpec::Matchers::DSL::Matcher
   class << self
-    def failure_messages(*method_names)
+    def failure_messages(&block)
       define_method :failure_message do
-        messages = method_names.map{|m| send(m)}.compact.join(' and ')
+        messages = instance_eval(&block).compact.join(' and ')
         messages.empty? ? super() : format('expected %s to %s but %s', actual, description, messages)
       end
     end
@@ -74,15 +74,10 @@ RSpec::Matchers.define(:have_attribute) do
     rescue NameError
   end
 
-  failure_messages :reader_failure_message, :writer_failure_message
-
-  def reader_failure_message
-    arity_failure_message(reader, 0)
-  end
-
-  def writer_failure_message
-    arity_failure_message(writer, 1)
-  end
+  failure_messages { [
+      arity_failure_message(reader, 0),
+      arity_failure_message(writer, 1)
+  ]}
 
   def arity_failure_message(method, expected_arity)
     format('%s() takes %d argument%s instead of %d', method.name, method.arity, method.arity == 1 ? '' : 's', expected_arity) if method && method.arity != expected_arity
