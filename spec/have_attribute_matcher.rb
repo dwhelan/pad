@@ -35,9 +35,7 @@ RSpec::Matchers.define(:have_attribute) do
 
   chain_group :access, :read_only, :write_only, :read_write
 
-  def description
-    format('have %s attribute %p', access_description, expected).gsub(/ +/, ' ')
-  end
+  chain(:with_reader) {|a| @reader_accesibility = a }
 
   private
 

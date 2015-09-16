@@ -21,10 +21,12 @@ module Pad
       before do
         klass.class_eval do
           attribute :name, String
+          attribute :private_reader, String, reader: :private
           end
         end
 
       it { is_expected.to have_attribute(:name) }
+      xit { is_expected.to have_attribute(:private_reader).with_reader(:private) }
 
       it do
         expect(subject.name).to be_nil
