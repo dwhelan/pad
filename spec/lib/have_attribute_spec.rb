@@ -74,7 +74,7 @@ describe 'have_attribute matcher' do
     end
   end
 
-  describe 'attribute method arity' do
+  describe 'method arity' do
     let(:klass) do
       Class.new do
         def no_args=; end
@@ -109,7 +109,7 @@ describe 'have_attribute matcher' do
     end
   end
 
-  describe 'attribute method visibility' do
+  describe 'method visibility' do
     let(:klass) do
       Class.new do
         def public_reader; end
@@ -151,6 +151,18 @@ describe 'have_attribute matcher' do
           its(:failure_message) { is_expected.to match /expected .+ to #{expected_description}/ }
           its(:failure_message_when_negated) { is_expected.to match /expected .+ not to #{expected_description}/ }
         end
+      end
+    end
+
+    it 'should fail if the reader visibility is invalid' do
+      expect { have_attribute(:private_reader).with_reader(:foo) }.to raise_error do |error|
+        expect(error.message).to match /foo is an invalid visibility; should be one of private, protected, public/
+      end
+    end
+
+    it 'should fail if the write visibility is invalid' do
+      expect { have_attribute(:private_writer).with_writer(:foo) }.to raise_error do |error|
+        expect(error.message).to match /foo is an invalid visibility; should be one of private, protected, public/
       end
     end
   end

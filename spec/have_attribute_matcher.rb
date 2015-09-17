@@ -37,27 +37,13 @@ RSpec::Matchers.define(:have_attribute) do
 
   chain_group :access, :read_only, :write_only, :read_write
 
-  chain(:with_reader, :reader_visibility)
-  chain(:with_writer, :writer_visibility)
+  chain(:with_reader) {|visibility| @reader_visibility = ensure_valid_visibility(visibility) }
+  chain(:with_writer) {|visibility| @writer_visibility = ensure_valid_visibility(visibility) }
 
   private
 
   def exists?
     reader || writer
-  end
-
-  def visibility_match?(accessor)
-    method = accessor == :reader ? reader : writer
-    return true unless method
-
-    case instance_variable_get(:"@#{accessor}_visibility")
-    when :private
-      actual.class.private_method_defined?(method.name)
-    when :protected
-      actual.class.protected_method_defined?(method.name)
-    else
-      actual.class.public_method_defined?(method.name)
-    end
   end
 
   def read_only_match?
@@ -100,5 +86,26 @@ RSpec::Matchers.define(:have_attribute) do
 
   def arity_failure_message(method, expected_arity)
     format('%s() takes %d argument%s instead of %d', method.name, method.arity, method.arity == 1 ? '' : 's', expected_arity) if method && method.arity != expected_arity
+  end
+
+  def visibility_match?(accessor)
+    method = accessor == :reader ? reader : writer
+    return true unless method
+
+    case instance_variable_get(:"@#{accessor}_visibility")
+    when :private
+      actual.class.private_method_defined?(method.name)
+    when :protected
+      actual.class.protected_method_defined?(method.name)
+    else
+      actual.class.public_method_defined?(method.name)
+    end
+  end
+
+  VALID_VISIBILITIES ||= [:private, :protected, :public]
+
+  def ensure_valid_visibility(visibility)
+    fail format("%s is an invalid visibility; should be one of %s", visibility, VALID_VISIBILITIES.join(', ')) unless VALID_VISIBILITIES.include?(visibility)
+    visibility
   end
 end
