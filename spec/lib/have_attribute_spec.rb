@@ -1,8 +1,9 @@
 require 'spec_helper'
 
-shared_context 'matcher from description' do
+shared_context 'matcher messages' do
   let(:matcher) { self.class.parent_groups[1].description }
   subject       { eval matcher }
+  before        { subject.matches? klass.new }
 end
 
 describe 'have_attribute matcher' do
@@ -16,7 +17,6 @@ describe 'have_attribute matcher' do
         attr_accessor :rw
       end
     end
-
 
     describe 'attr_reader :r' do
       it { is_expected.to     have_attribute(:r)            }
@@ -39,10 +39,7 @@ describe 'have_attribute matcher' do
       it { is_expected.not_to have_attribute(:rw).write_only }
     end
 
-    describe 'messaging' do
-      include_context 'matcher from description'
-      before        { subject.matches? klass.new }
-
+    it_behaves_like 'matcher messages' do
       {
           :'have_attribute(:name)'            => 'have attribute :name',
           :'have_attribute(:name).read_only'  => 'have attribute :name read only',
@@ -55,7 +52,7 @@ describe 'have_attribute matcher' do
 
       }.each do |expectation, expected_description|
         describe(expectation) do
-          its(:description)                  { is_expected.to eq expected_description }
+          its(:description)                  { is_expected.to eql expected_description }
           its(:failure_message)              { is_expected.to match /expected .+ to #{expected_description}/ }
           its(:failure_message_when_negated) { is_expected.to match /expected .+ not to #{expected_description}/ }
         end
@@ -94,14 +91,11 @@ describe 'have_attribute matcher' do
     end
 
     describe 'writer should take one argument' do
-      it { is_expected.not_to have_attribute(:no_args=).write_only            }
-      it { is_expected.not_to have_attribute(:two_args=).write_only            }
+      it { is_expected.not_to have_attribute(:no_args=).write_only  }
+      it { is_expected.not_to have_attribute(:two_args=).write_only }
     end
 
-    describe 'messaging' do
-      include_context 'matcher from description'
-      before        { subject.matches? klass.new }
-
+    it_behaves_like 'matcher messages' do
       {
           :'have_attribute(:no_args).write_only' => 'have attribute :no_args write only but no_args=\(\) takes 0 arguments instead of 1',
           :'have_attribute(:one_arg).read_only'  => 'have attribute :one_arg read only but one_arg\(\) takes 1 argument instead of 0',
@@ -147,6 +141,20 @@ describe 'have_attribute matcher' do
       it { is_expected.not_to have_attribute(:protected_reader).with_reader(:public) }
       it { is_expected.to     have_attribute(:public_reader).with_reader(:public) }
       it { is_expected.not_to have_attribute(:missing).with_reader(:public) }
+    end
+
+    it_behaves_like 'matcher messages' do
+      {
+          :'have_attribute(:private_reader).with_reader(:private)'     => 'have attribute :private_reader with reader :private',
+          :'have_attribute(:protected_reader).with_reader(:protected)' => 'have attribute :protected_reader with reader :protected',
+          :'have_attribute(:public_reader).with_reader(:public)'       => 'have attribute :public_reader with reader :public',
+
+      }.each do |expectation, expected_description|
+        describe(expectation) do
+          its(:description)     { is_expected.to eql expected_description }
+          its(:failure_message) { is_expected.to match /expected .+ to #{expected_description}/ }
+        end
+      end
     end
   end
 end

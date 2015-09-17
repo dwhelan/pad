@@ -35,10 +35,9 @@ RSpec::Matchers.define(:have_attribute) do
     exists? && access_match? && visibility_match?(:reader)
   end
 
-
   chain_group :access, :read_only, :write_only, :read_write
 
-  chain(:with_reader) {|a| @reader_visibility = a }
+  chain(:with_reader, :reader_visibility)
 
   private
 
