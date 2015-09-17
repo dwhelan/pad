@@ -32,12 +32,13 @@ end
 
 RSpec::Matchers.define(:have_attribute) do
   match do
-    exists? && access_match? && visibility_match?(:reader)
+    exists? && access_match? && visibility_match?(:reader) && visibility_match?(:writer)
   end
 
   chain_group :access, :read_only, :write_only, :read_write
 
   chain(:with_reader, :reader_visibility)
+  chain(:with_writer, :writer_visibility)
 
   private
 

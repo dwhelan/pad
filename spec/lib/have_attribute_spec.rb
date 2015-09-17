@@ -113,34 +113,30 @@ describe 'have_attribute matcher' do
     let(:klass) do
       Class.new do
         def public_reader; end
+        def public_writer=(arg); end
 
         protected
         def protected_reader; end
+        def protected_writer=(arg); end
 
         private
         def private_reader; end
+        def private_writer=(arg); end
       end
     end
 
-    describe 'should support private reader' do
-      it { is_expected.to     have_attribute(:private_reader).with_reader(:private) }
-      it { is_expected.not_to have_attribute(:protected_reader).with_reader(:private) }
-      it { is_expected.not_to have_attribute(:public_reader).with_reader(:private) }
-      it { is_expected.not_to have_attribute(:missing).with_reader(:private) }
-    end
-
-    describe 'should support protected reader' do
-      it { is_expected.not_to have_attribute(:private_reader).with_reader(:protected) }
-      it { is_expected.to     have_attribute(:protected_reader).with_reader(:protected) }
-      it { is_expected.not_to have_attribute(:public_reader).with_reader(:protected) }
-      it { is_expected.not_to have_attribute(:missing).with_reader(:protected) }
-    end
-
-    describe 'should support public reader' do
-      it { is_expected.not_to have_attribute(:private_reader).with_reader(:public) }
-      it { is_expected.not_to have_attribute(:protected_reader).with_reader(:public) }
-      it { is_expected.to     have_attribute(:public_reader).with_reader(:public) }
-      it { is_expected.not_to have_attribute(:missing).with_reader(:public) }
+    [:private, :protected, :public].each do |visibility|
+      [:private, :protected, :public].each do |prefix|
+        if visibility == prefix
+          it { is_expected.to have_attribute(:"#{prefix}_reader").with_reader(visibility) }
+          it { is_expected.to have_attribute(:"#{prefix}_writer").with_writer(visibility) }
+        else
+          it { is_expected.not_to have_attribute(:"#{prefix}_reader").with_reader(visibility) }
+          it { is_expected.not_to have_attribute(:"#{prefix}_writer").with_writer(visibility) }
+        end
+        it { is_expected.not_to have_attribute(:missing).with_reader(visibility) }
+        it { is_expected.not_to have_attribute(:missing).with_writer(visibility) }
+      end
     end
 
     it_behaves_like 'matcher messages' do
@@ -153,6 +149,7 @@ describe 'have_attribute matcher' do
         describe(expectation) do
           its(:description)     { is_expected.to eql expected_description }
           its(:failure_message) { is_expected.to match /expected .+ to #{expected_description}/ }
+          its(:failure_message_when_negated) { is_expected.to match /expected .+ not to #{expected_description}/ }
         end
       end
     end
