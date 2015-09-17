@@ -31,13 +31,34 @@ class RSpec::Matchers::DSL::Matcher
 end
 
 RSpec::Matchers.define(:have_attribute) do
-  match { access_match? }
+  match do
+    exists? && access_match? && visibility_match?(:reader)
+  end
+
 
   chain_group :access, :read_only, :write_only, :read_write
 
-  chain(:with_reader) {|a| @reader_accesibility = a }
+  chain(:with_reader) {|a| @reader_visibility = a }
 
   private
+
+  def exists?
+    reader || writer
+  end
+
+  def visibility_match?(accessor)
+    method = accessor == :reader ? reader : writer
+    return true unless method
+
+    case instance_variable_get(:"@#{accessor}_visibility")
+    when :private
+      actual.class.private_method_defined?(method.name)
+    when :protected
+      actual.class.protected_method_defined?(method.name)
+    else
+      actual.class.public_method_defined?(method.name)
+    end
+  end
 
   def read_only_match?
     reader_ok? && writer.nil?

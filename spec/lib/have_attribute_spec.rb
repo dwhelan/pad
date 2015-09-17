@@ -6,6 +6,7 @@ shared_context 'matcher from description' do
 end
 
 describe 'have_attribute matcher' do
+  subject { klass.new }
 
   describe 'basic attributes' do
     let(:klass) do
@@ -16,7 +17,6 @@ describe 'have_attribute matcher' do
       end
     end
 
-    subject { klass.new }
 
     describe 'attr_reader :r' do
       it { is_expected.to     have_attribute(:r)            }
@@ -115,21 +115,38 @@ describe 'have_attribute matcher' do
     end
   end
 
-  describe 'attribute method accessibility' do
+  describe 'attribute method visibility' do
     let(:klass) do
       Class.new do
-        def public_reader
-        end
-        private
+        def public_reader; end
 
-        def private_reader
-        end
+        protected
+        def protected_reader; end
+
+        private
+        def private_reader; end
       end
     end
 
     describe 'should support private reader' do
       it { is_expected.to     have_attribute(:private_reader).with_reader(:private) }
-      xit { is_expected.not_to have_attribute(:public_reader).with_reader(:private) }
+      it { is_expected.not_to have_attribute(:protected_reader).with_reader(:private) }
+      it { is_expected.not_to have_attribute(:public_reader).with_reader(:private) }
+      it { is_expected.not_to have_attribute(:missing).with_reader(:private) }
+    end
+
+    describe 'should support protected reader' do
+      it { is_expected.not_to have_attribute(:private_reader).with_reader(:protected) }
+      it { is_expected.to     have_attribute(:protected_reader).with_reader(:protected) }
+      it { is_expected.not_to have_attribute(:public_reader).with_reader(:protected) }
+      it { is_expected.not_to have_attribute(:missing).with_reader(:protected) }
+    end
+
+    describe 'should support public reader' do
+      it { is_expected.not_to have_attribute(:private_reader).with_reader(:public) }
+      it { is_expected.not_to have_attribute(:protected_reader).with_reader(:public) }
+      it { is_expected.to     have_attribute(:public_reader).with_reader(:public) }
+      it { is_expected.not_to have_attribute(:missing).with_reader(:public) }
     end
   end
 end
