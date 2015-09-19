@@ -1,15 +1,14 @@
 require 'virtus'
 
 module Pad
-
   module Virtus
     [:model, :value_object].each do |method|
-      define_singleton_method method do |options={}, &block|
+      define_singleton_method method do |options = {}, &block|
         ::Virtus.public_send(method, options, &block)
       end
     end
 
-    def self.entity(options={}, &block)
+    def self.entity(options = {}, &block)
       EntityBuilder.call(options, &block)
     end
 

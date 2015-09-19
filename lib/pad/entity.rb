@@ -1,14 +1,12 @@
 module Pad
-
   module Entity
-
     def self.included(base)
       base.instance_eval do
         attribute :id
       end
     end
 
-    def == (other)
+    def ==(other)
       cmp?(__method__, other)
     end
 

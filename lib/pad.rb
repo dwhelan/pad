@@ -5,15 +5,14 @@ require 'pad/version'
 require 'pad/entity'
 
 module Pad
-
   class << self
     [:model, :entity, :value_object].each do |method|
-      define_method method do |options={}, &block|
+      define_method method do |options = {}, &block|
         build(method, options, &block)
       end
     end
 
-    def config(&block)
+    def config
       yield configuration if block_given?
       configuration
     end
@@ -37,6 +36,5 @@ module Pad
     def configuration
       @configuration ||= Configuration.new
     end
-
   end
 end

@@ -1,0 +1,21 @@
+Metrics/LineLength:
+  Max: 160
+  Enabled: false
+
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+
+Style/TrailingComma:
+  EnforcedStyleForMultiline: comma
+
+Style/EmptyLineBetweenDefs:
+  Enabled: false
+
+Style/SingleSpaceBeforeFirstArg:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Lint/Eval:
+  Enabled: false

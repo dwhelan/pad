@@ -15,7 +15,7 @@ require 'pad'
 
 require 'delegate_matcher'
 
-Dir['./spec/shared/**/*.rb'].sort.each { |f| require f}
+Dir['./spec/shared/**/*.rb'].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.color = true

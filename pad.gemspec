@@ -17,14 +17,15 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files -z`.split("\x0")
   gem.executables   = gem.files.grep(%r{^bin/}) { |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.require_paths = ["lib"]
+  gem.require_paths = ['lib']
 
   gem.add_dependency 'virtus', '~> 1.0'
 
-  gem.add_development_dependency 'bundler', '         ~>  1.7'
+  gem.add_development_dependency 'bundler',          '~>  1.7'
   gem.add_development_dependency 'coveralls',        '~>  0.7'
   gem.add_development_dependency 'delegate_matcher', '~>  0.0'
   gem.add_development_dependency 'rake',             '~> 10.0'
   gem.add_development_dependency 'rspec',            '~>  3.0'
   gem.add_development_dependency 'rspec-its',        '~>  1.1'
+  gem.add_development_dependency 'rubocop',          '~>  0.30'
 end

@@ -1,14 +1,12 @@
 require 'spec_helper'
 
 module Pad
-
   describe Configuration do
-
     let(:builder) { double 'builder' }
 
     describe 'initialize' do
       it 'should allow no options' do
-         Configuration.new
+        Configuration.new
       end
 
       it 'should allow options' do
@@ -17,7 +15,7 @@ module Pad
 
       it 'should yield self' do
         yeilded_argument = nil
-        configuration = Configuration.new {|arg| yeilded_argument = arg}
+        configuration = Configuration.new { |arg| yeilded_argument = arg }
         expect(yeilded_argument).to be configuration
       end
     end

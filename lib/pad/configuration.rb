@@ -1,10 +1,9 @@
 module Pad
-
   class Configuration
     attr_accessor :builder
 
     # @api private
-    def initialize(options={})
+    def initialize(options = {})
       @builder = options.fetch(:builder, Pad::Virtus)
 
       yield self if block_given?
@@ -12,4 +11,4 @@ module Pad
   end
 end
 
-# TODO use a Virtus value object
+# TODO: use a Virtus value object
