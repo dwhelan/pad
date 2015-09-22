@@ -5,7 +5,7 @@
 
 # Pad
 
-TODO: Write a gem description
+A gem that enables a [Ports and Adapter](http://alistair.cockburn.us/Hexagonal+architecture) architectural style with [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design).
 
 ## Installation
 
