@@ -1,3 +1,8 @@
+[![Gem Version](https://badge.fury.io/rb/pad.svg)](http://badge.fury.io/rb/pad)
+[![Build Status](https://travis-ci.org/dwhelan/pad.svg?branch=master)](https://travis-ci.org/dwhelan/pad)
+[![Code Climate](https://codeclimate.com/github/dwhelan/pad/badges/gpa.svg)](https://codeclimate.com/github/dwhelan/pad)
+[![Coverage Status](https://coveralls.io/repos/dwhelan/pad/badge.svg?branch=master&service=github)](https://coveralls.io/github/dwhelan/pad?branch=master)
+
 # Pad
 
 TODO: Write a gem description
