@@ -9,11 +9,7 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
 ]
 SimpleCov.start
 
-Coveralls.wear!
-
-require 'pad'
-
-require 'delegate_matcher'
+Coveralls.wear! if Coveralls.will_run?
 
 Dir['./spec/shared/**/*.rb'].sort.each { |f| require f }
 
@@ -26,4 +22,6 @@ RSpec.configure do |config|
   end
 end
 
-require_relative 'have_attribute_matcher'
+require 'pad'
+require 'attribute_matcher'
+require 'delegate_matcher'
