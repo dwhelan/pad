@@ -4,34 +4,19 @@ module Pad
   end
 
   shared_examples 'a model module' do |mod|
+    include_examples 'attribute examples', mod
+
     let(:klass) { Class.new { include mod } }
+    subject     { klass.new }
 
-    describe 'attributes' do
-      subject { klass.new }
-
+    describe 'default visibility' do
       before do
         klass.class_eval do
-          attribute :thing
-          attribute :name, String
-          attribute :private_reader, String, reader: :private
+          attribute :default
         end
       end
 
-      it { is_expected.to have_attribute(:thing) }
-      it { is_expected.to have_attribute(:name) }
-      it { is_expected.to have_attribute(:private_reader).with_reader(:private) }
-
-      it do
-        expect(subject.name).to be_nil
-      end
-
-      it do
-        subject.name = 'John'
-        expect(subject.name).to eq 'John'
-      end
+      it { is_expected.to have_attribute(:default).with_reader(:public).with_writer(:public) }
     end
-
-    # TODO: add additional model checks: attributes, mass assignment, contructor
-    # TODO: add optional features of model
   end
 end

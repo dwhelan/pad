@@ -4,6 +4,8 @@ module Pad
   end
 
   shared_examples_for 'an entity module' do |mod|
+    include_examples 'a model module', mod
+
     let(:entity_class) { Class.new { include mod } }
     let(:subclass)     { Class.new(entity_class).new(id: 1) }
 
