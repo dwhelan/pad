@@ -31,7 +31,8 @@ module Pad
       it { is_expected.to have_attribute(:public).   with_reader(:public).   with_writer(:public)    }
     end
 
-    # TODO: add additional model checks: attributes, mass assignment, constructor
+    # TODO: add checks for mass assignment, constructor
+    # TODO: add checks for constructor
     # TODO: add optional features of model
   end
 end
