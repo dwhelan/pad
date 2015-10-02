@@ -30,5 +30,3 @@ describe Pad do
     end
   end
 end
-
-# TODO: Test configuration
