@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Pad
   describe Configuration do
-
     describe 'initialize' do
       it 'should allow no options' do
         Configuration.new

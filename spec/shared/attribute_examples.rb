@@ -7,14 +7,21 @@ module Pad
       before do
         klass.class_eval do
           attribute :name
-          attribute :address, String
         end
       end
 
       it { is_expected.to have_attribute(:name).with_reader(:public) }
       it { expect(subject.name).to be_nil }
+    end
 
-      it { is_expected.to have_attribute(:address) }
+    describe 'type' do
+      before do
+        klass.class_eval do
+          attribute :name, String, default: ''
+        end
+      end
+
+      it { is_expected.to have_attribute(:name).of_type(String) }
     end
 
     describe 'visibility' do
