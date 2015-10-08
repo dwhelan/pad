@@ -47,8 +47,35 @@ another_dave = Person.new id: 21
 dave == another_dave # => true
 ```
 
+### Value Objects
+You can create value objects which have use read-only attribute values to denote equality.
+Attribute values are passed into the constructor as a hash. Attributes to be considered
+when checking equality are surrounded by a ```values``` block.
+
+```ruby
+require 'pad'
+
+class Price
+  include Pad.value_object
+
+  values do
+    attribute :cost
+    attribute :currency
+  end
+
+  attribute :id
+end
+
+pen1 = Price.new id: 1, cost: 100, currency: 'CAD' # => ##<Price cost=100 currency="CAD">
+pen2 = Price.new id: 2, cost: 100, currency: 'CAD' # => ##<Price cost=100 currency="CAD">
+pen3 = Price.new id: 3, cost: 999, currency: 'CAD' # => ##<Price cost=100 currency="CAD">
+
+pen1 == pen2 # => true
+pen1 == pen3 # => false
+```
+
 ### Custom Classes
-You can create your own classes and use Pad attributes.
+You can create your own classes and use Pad attributes by including ```Pad.model``` in your classes.
 
 ```ruby
 require 'pad'
