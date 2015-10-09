@@ -25,8 +25,48 @@ Or install it yourself as:
 
 ## Usage
 
+### Models
+You can create your own models and use Pad attributes by including ```Pad.model``` in your classes.
+This will add an ```attribute``` method you can use to add attributes to your class.
+
+```ruby
+require 'pad'
+
+class Vehicle
+  include Pad.model
+
+  attribute :year
+  attribute :manufacturer
+  attribute :make
+end
+```
+
+Attribute values can be passed into the constructor as a hash using a key of the attribute name.
+```ruby
+sienna = Vehicle.new year: 2006, manufacturer: 'Toyota', make: 'Sienna' # => #<Vehicle:0x007fcdacd2ff38 @year=2006, @manufacturer="Toyota", @make="Sienna">
+```
+
+And readers and writers are available for each attribute:
+```ruby
+sienna.year # => 2006
+sienna.year = 2007
+sienna  # => #<Vehicle:0x007fcdacd2ff38 @year=2007, @manufacturer="Toyota", @make="Sienna">
+```
+
+You can set the type of an attribute
+```ruby
+  attribute :name, String
+```
+
+You can set the visibility of attributes:
+
+```ruby
+  attribute :private,   String, reader: :private,   writer: :private
+  attribute :protected, String, reader: :protected, writer: :protected
+  attribute :public,    String, reader: :public,    writer: :public
+```
 ### Entities
-You can create entities which have a built-in 'id' attribute which uniquely identifies the entity.
+You can create entities which extend models with a built-in 'id' attribute which uniquely identifies the entity.
 
 ```ruby
 require 'pad'
@@ -72,26 +112,6 @@ pen3 = Price.new id: 3, cost: 999, currency: 'CAD' # => ##<Price cost=100 curren
 
 pen1 == pen2 # => true
 pen1 == pen3 # => false
-```
-
-### Custom Classes
-You can create your own classes and use Pad attributes by including ```Pad.model``` in your classes.
-
-```ruby
-require 'pad'
-
-class Vehicle
-  include Pad.model
-
-  attribute :year
-  attribute :manufacturer
-  attribute :make
-end
-
-sienna = Vehicle.new year: 2006, manufacturer: 'Toyota', make: 'Sienna' # => #<Vehicle:0x007fcdacd2ff38 @year=2006, @manufacturer="Toyota", @make="Sienna">
-sienna.year # => 2006
-sienna.year = 2007
-sienna  # => #<Vehicle:0x007fcdacd2ff38 @year=2007, @manufacturer="Toyota", @make="Sienna">
 ```
 
 ## Contributing

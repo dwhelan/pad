@@ -17,25 +17,33 @@ module Pad
     describe 'type' do
       before do
         klass.class_eval do
-          attribute :name, String, default: ''
+          attribute :name, String
         end
       end
 
       it { is_expected.to have_attribute(:name).of_type(String) }
     end
 
-    describe 'visibility' do
+    describe 'options' do
       before do
         klass.class_eval do
           attribute :private,   String, reader: :private,   writer: :private
           attribute :protected, String, reader: :protected, writer: :protected
           attribute :public,    String, reader: :public,    writer: :public
+
+          attribute :name, String, default: 'Joe'
         end
       end
 
-      it { is_expected.to have_attribute(:private).  with_reader(:private).  with_writer(:private)   }
-      it { is_expected.to have_attribute(:protected).with_reader(:protected).with_writer(:protected) }
-      it { is_expected.to have_attribute(:public).   with_reader(:public).   with_writer(:public)    }
+      describe 'visibility' do
+        it { is_expected.to have_attribute(:private).  with_reader(:private).  with_writer(:private)   }
+        it { is_expected.to have_attribute(:protected).with_reader(:protected).with_writer(:protected) }
+        it { is_expected.to have_attribute(:public).   with_reader(:public).   with_writer(:public)    }
+      end
+
+      describe 'default' do
+        it { is_expected.to have_attribute(:name).with_value('Joe') }
+      end
     end
 
     # TODO: add checks for mass assignment, constructor
