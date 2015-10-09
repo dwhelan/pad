@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'virtus', '~> 1.0'
 
-  gem.add_development_dependency 'attribute_matcher', '~>  0.2'
+  gem.add_development_dependency 'attribute_matcher', '~>  0.3'
   gem.add_development_dependency 'bundler',           '~>  1.7'
   gem.add_development_dependency 'coveralls',         '~>  0.7'
   gem.add_development_dependency 'delegate_matcher',  '~>  0.0'
