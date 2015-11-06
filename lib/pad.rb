@@ -3,7 +3,6 @@ require 'pad/virtus'
 require 'pad/configuration'
 require 'pad/version'
 require 'pad/entity'
-require 'pad/repository/memory'
 
 module Pad
   class << self

@@ -35,23 +35,5 @@ module Pad
         expect(configuration.builder).to be builder
       end
     end
-
-    describe 'repository' do
-      let(:repository) { double 'repository' }
-
-      it 'should default to Pad::Repository::Memory' do
-        expect(subject.repository).to be Pad::Repository::Memory
-      end
-
-      it 'should be settable' do
-        subject.repository = repository
-        expect(subject.repository).to be repository
-      end
-
-      it 'should be settable via initialization' do
-        configuration = Configuration.new(repository: repository)
-        expect(configuration.repository).to be repository
-      end
-    end
   end
 end

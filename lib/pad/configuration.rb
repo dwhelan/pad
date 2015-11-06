@@ -5,8 +5,7 @@ module Pad
 
     # @api private
     def initialize(options = {})
-      self.builder    = options.fetch(:builder,    Pad::Virtus)
-      self.repository = options.fetch(:repository, Pad::Repository::Memory)
+      self.builder = options.fetch(:builder, Pad::Virtus)
 
       yield self if block_given?
     end
