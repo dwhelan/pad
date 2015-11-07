@@ -42,9 +42,8 @@ module Pad
       end
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        define_method(method) do |progname = nil, &block|
-          log(method, progname, &block)
-        end
+        define_method(method)       { |progname = nil, &block|  log(method, progname, &block) }
+        define_method("#{method}?") { log?(method) } unless method == :unknown
       end
 
       private
@@ -52,6 +51,12 @@ module Pad
       def log(method, progname, &block)
         services.each do |service|
           service.public_send method, progname, &block
+        end
+      end
+
+      def log?(method)
+        services.any? do |service|
+          service.public_send "#{method}?"
         end
       end
     end
