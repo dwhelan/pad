@@ -2,6 +2,16 @@ require 'spec_helper'
 
 module Pad
   module Services
+    shared_examples 'logging service delegation' do
+      [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
+        describe method.to_s do
+          it { expect(subject).to delegate(method).with('message').to(logger).without_return }
+          it { expect(subject).to delegate(method).with('message').with_block.to(logger).without_return }
+          it { expect(subject).to delegate(method).with.with_block.to(logger).with(nil).without_return }
+        end
+      end
+    end
+
     describe Logger do
       before do
         @service_classes = Logging.service_classes
@@ -16,36 +26,23 @@ module Pad
 
         before { Logging.register logger }
 
-        [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-          describe method.to_s do
-            it { expect(subject).to delegate(method).with('message').to(logger).without_return }
-            it { expect(subject).to delegate(method).with('message').with_block.to(logger).without_return }
-            it { expect(subject).to delegate(method).with.with_block.to(logger).with(nil).without_return }
-          end
-        end
+        include_examples 'logging service delegation'
       end
 
       describe 'custom logger' do
         before do
-          klass = Class.new do
+          Class.new do
             include Pad::Services::Logging
 
             [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-              define_method(method) {|*|}
+              define_method(method) { |*| }
             end
           end
-          klass.new
         end
 
         let(:logger) { subject.services.first }
 
-        [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-          describe method.to_s do
-            it { expect(subject).to delegate(method).with('message').to(logger).without_return }
-            it { expect(subject).to delegate(method).with('message').with_block.to(logger).without_return }
-            it { expect(subject).to delegate(method).with.with_block.to(logger).with(nil).without_return }
-          end
-        end
+        include_examples 'logging service delegation'
       end
 
       after do

@@ -4,22 +4,16 @@ module Pad
   module Services
     module Logging
       class << self
-        attr_writer :service_classes, :services
+        attr_accessor :service_classes, :services
 
         def included(base)
-          service_classes << base
+          @service_classes ||= []
+          @service_classes << base
         end
 
         def register(service)
-          services << service
-        end
-
-        def service_classes
-          @service_classes ||= []
-        end
-
-        def services
           @services ||= []
+          @services << service
         end
       end
     end
@@ -48,5 +42,5 @@ module Pad
   end
 end
 
-# TODO: clear and set all service_classes and services
 # TODO: default to standard Ruby logger?
+# TODO: handle debug? et al
