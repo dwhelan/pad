@@ -1,8 +1,6 @@
 module Pad
   module Services
-
     module Logging
-
       class << self
         def included(base)
           service_classes << base
@@ -37,3 +35,5 @@ module Pad
     end
   end
 end
+
+# TODO: default to standard Ruby logger?
