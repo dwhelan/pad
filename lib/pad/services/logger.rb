@@ -42,7 +42,7 @@ module Pad
       end
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        define_method(method)       { |progname = nil, &block|  log(method, progname, &block) }
+        define_method(method)       { |progname = nil, &block| log(method, progname, &block) }
         define_method("#{method}?") { log?(method) } unless method == :unknown
       end
 

@@ -10,11 +10,10 @@ module Pad
           it { expect(subject).to delegate(method).with.with_block.to(logger).with(nil).without_return }
         end
 
-        unless method == :unknown
-          describe "#{method}?" do
-            it { expect(subject).to delegate("#{method}?").to(logger).without_return }
-            it { expect(subject.public_send "#{method}?").to be true }
-          end
+        next if method == :unknown
+
+        describe "#{method}?" do
+          it { expect(subject).to delegate("#{method}?").to(logger).without_return }
         end
       end
     end
