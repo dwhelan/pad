@@ -4,17 +4,33 @@ module Pad
   module Services
     module Logging
       class << self
-        attr_accessor :service_classes, :services
+        attr_reader :service_classes, :services
 
         def included(base)
-          @service_classes ||= []
-          @service_classes << base
+          self.service_classes ||= []
+          service_classes << base
         end
 
         def register(service)
-          @services ||= []
-          @services << service
+          self.services ||= []
+          services << service
         end
+
+        def clear
+          { services: services, service_classes: service_classes }.tap do
+            self.service_classes = []
+            self.services = []
+          end
+        end
+
+        def restore(state)
+          self.service_classes = state[:service_classes]
+          self.services        = state[:services]
+        end
+
+        private
+
+        attr_writer :service_classes, :services
       end
     end
 

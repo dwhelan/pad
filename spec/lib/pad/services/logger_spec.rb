@@ -14,11 +14,7 @@ module Pad
 
     describe Logger do
       before do
-        @service_classes = Logging.service_classes
-        @services        = Logging.services
-
-        Pad::Services::Logging.service_classes = []
-        Pad::Services::Logging.services        = []
+        @state = Logging.clear
       end
 
       describe 'ruby logger' do
@@ -32,7 +28,7 @@ module Pad
       describe 'custom logger' do
         before do
           Class.new do
-            include Pad::Services::Logging
+            include Logging
 
             [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
               define_method(method) { |*| }
@@ -46,8 +42,7 @@ module Pad
       end
 
       after do
-        Pad::Services::Logging.service_classes = @service_classes
-        Pad::Services::Logging.services        = @services
+        Logging.restore(@state)
       end
     end
   end
