@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'attribute_matcher', '~>  0.3'
   gem.add_development_dependency 'bundler',           '~>  1.7'
   gem.add_development_dependency 'coveralls',         '~>  0.7'
-  gem.add_development_dependency 'delegate_matcher',  '~>  0.0'
+  gem.add_development_dependency 'delegate_matcher',  '~>  0.1'
   gem.add_development_dependency 'guard',             '~>  2.13'
   gem.add_development_dependency 'guard-rspec',       '~>  4.6'
   gem.add_development_dependency 'rake',              '~> 10.0'

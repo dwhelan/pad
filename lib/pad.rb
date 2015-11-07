@@ -4,6 +4,8 @@ require 'pad/configuration'
 require 'pad/version'
 require 'pad/entity'
 
+require 'pad/services/logger'
+
 module Pad
   class << self
     [:model, :entity, :value_object].each do |method|
