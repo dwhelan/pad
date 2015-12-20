@@ -2,51 +2,52 @@ require 'spec_helper'
 
 module Pad
   module Services
-    shared_examples 'logging service delegation' do
-      [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        describe method.to_s do
-          it { expect(subject).to delegate(method).with('message').to(logger).without_return }
-          it { expect(subject).to delegate(method).with('message').with_block.to(logger).without_return }
-          it { expect(subject).to delegate(method).with.with_block.to(logger).with(nil).without_return }
-        end
-
-        next if method == :unknown
-
-        describe "#{method}?" do
-          it { expect(subject).to delegate("#{method}?").to(logger).without_return }
-        end
-      end
-    end
-
     describe Logger do
-      before { @state = Logging.clear }
+      let(:logger1) { double('logger1') }
+      let(:logger2) { double('logger2') }
 
-      describe 'ruby logger' do
-        let(:logger) { ::Logger.new(nil) }
+      before { subject.register logger1 }
+      before { subject.register logger2 }
 
-        before { Logging.register logger }
+      [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
+        it "#{method}(message) should be delegated" do
+          expect(logger1).to receive(method).with('message')
+          expect(logger2).to receive(method).with('message')
+          subject.send method, 'message'
+        end
 
-        include_examples 'logging service delegation'
-      end
+        it "#{method}() should be delegated" do
+          expect(logger1).to receive(method).with(no_args)
+          expect(logger2).to receive(method).with(no_args)
+          subject.send method
+        end
 
-      describe 'custom logger' do
-        before do
-          Class.new do
-            include Logging
+        it "#{method} should return true if any logger return true" do
+          allow(logger1).to receive(method) { true  }
+          allow(logger2).to receive(method) { false }
+          expect(subject.send(method, 'message')).to be true
+        end
 
-            [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-              define_method(method)       { |*| }
-              define_method("#{method}?") { true } unless method == :unknown
-            end
+        it "#{method} should return false if all loggers return false" do
+          allow(logger1).to receive(method) { false }
+          allow(logger2).to receive(method) { false }
+          expect(subject.send(method, 'message')).to be false
+        end
+
+        unless method == :unknown
+          it "#{method}? should return true if any logger return true" do
+            allow(logger1).to receive("#{method}?") { true  }
+            allow(logger2).to receive("#{method}?") { false }
+            expect(subject.send("#{method}?")).to be true
+          end
+
+          it "#{method}? should return false if all loggers return false" do
+            allow(logger1).to receive("#{method}?") { false }
+            allow(logger2).to receive("#{method}?") { false }
+            expect(subject.send("#{method}?")).to be false
           end
         end
-
-        let(:logger) { subject.services.first }
-
-        include_examples 'logging service delegation'
       end
-
-      after { Logging.restore @state }
     end
   end
 end

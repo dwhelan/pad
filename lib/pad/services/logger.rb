@@ -2,66 +2,41 @@ require 'logger'
 
 module Pad
   module Services
-    module Logging
+    class Logger
       class << self
-        attr_reader :service_classes, :services
-
-        def included(base)
-          self.service_classes ||= []
-          service_classes << base
-        end
-
-        def register(service)
-          self.services ||= []
-          services << service
-        end
-
-        def clear
-          { services: services, service_classes: service_classes }.tap do
-            self.service_classes = []
-            self.services = []
+        def def_service_delegator(method, composite_method = :map, *args, &block)
+          define_method method do |*args, &b|
+            result = services.send(composite_method) { |service| service.send(method, *args, &b) }
+            block ? block.call(result) : result
           end
         end
 
-        def restore(state)
-          self.service_classes = state[:service_classes]
-          self.services        = state[:services]
-        end
-
-        private
-
-        attr_writer :service_classes, :services
+        alias_method :services_delegator, :def_service_delegator
       end
-    end
 
-    class Logger
-      attr_reader :services
-
-      def initialize
-        @services = Logging.service_classes.map(&:new) + Logging.services
+      def register(service)
+        services << service
       end
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        define_method(method)       { |progname = nil, &block| log(method, progname, &block) }
-        define_method("#{method}?") { log?(method) } unless method == :unknown
+        services_delegator("#{method}?")          { |results| results.any? } unless method == :unknown
+
+        services_delegator method, :map, 'message=nil' do |results| results.any? end
       end
 
       private
 
-      def log(method, progname, &block)
-        services.each do |service|
-          service.public_send method, progname, &block
-        end
-      end
-
-      def log?(method)
-        services.any? do |service|
-          service.public_send "#{method}?"
-        end
+      def services
+        @services ||= []
       end
     end
   end
 end
 
 # TODO: default to standard Ruby logger?
-# TODO: handle debug? et al
+# TODO: handle progname
+# TODO: handle add
+# TODO: handle log
+# TODO: handle <<
+# TODO: handle close
+# TODO: handle datetime_format
