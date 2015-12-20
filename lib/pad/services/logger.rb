@@ -19,10 +19,11 @@ module Pad
       end
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        services_delegator("#{method}?")          { |results| results.any? } unless method == :unknown
-
-        services_delegator method, :map, 'message=nil' do |results| results.any? end
+        services_delegator(method, :map, 'message=nil') { |results| results.any? }
+        services_delegator("#{method}?")                { |results| results.any? } unless method == :unknown
       end
+
+      services_delegator(:<<) { |results| results.compact.inject(:+) }
 
       private
 

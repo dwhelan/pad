@@ -48,6 +48,23 @@ module Pad
           end
         end
       end
+
+      describe '<<' do
+        before do
+          allow(logger1).to receive(:<<).with('message') { 7 }
+          allow(logger2).to receive(:<<).with('message') { 7 }
+        end
+
+        it 'should delgate' do
+          expect(logger1).to receive(:<<).with('message')
+          expect(logger2).to receive(:<<).with('message')
+          subject << 'message'
+        end
+
+        it 'return the total characters written' do
+          expect(subject << 'message').to eq 14
+        end
+      end
     end
   end
 end
