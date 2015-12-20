@@ -24,6 +24,7 @@ module Pad
       end
 
       services_delegator(:<<) { |results| results.compact.inject(:+) }
+      services_delegator(:log, :map, 'severity', 'message = nil', 'progname = nil') { |results| results.compact.inject(:+) }
 
       private
 

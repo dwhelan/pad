@@ -50,19 +50,47 @@ module Pad
       end
 
       describe '<<' do
-        before do
-          allow(logger1).to receive(:<<).with('message') { 7 }
-          allow(logger2).to receive(:<<).with('message') { 7 }
-        end
-
-        it 'should delgate' do
+        it 'should be delegated' do
           expect(logger1).to receive(:<<).with('message')
           expect(logger2).to receive(:<<).with('message')
           subject << 'message'
         end
 
         it 'return the total characters written' do
+          allow(logger1).to receive(:<<).with('message') { 7 }
+          allow(logger2).to receive(:<<).with('message') { 7 }
           expect(subject << 'message').to eq 14
+        end
+      end
+
+      describe 'log' do
+        it 'should be delegated with only a severity' do
+          expect(logger1).to receive(:log).with(::Logger::INFO)
+          expect(logger2).to receive(:log).with(::Logger::INFO)
+          subject.log ::Logger::INFO
+        end
+
+        it 'should be delegated with a message' do
+          expect(logger1).to receive(:log).with(::Logger::INFO, 'message')
+          expect(logger2).to receive(:log).with(::Logger::INFO, 'message')
+          subject.log ::Logger::INFO, 'message'
+        end
+
+        it 'should be delegated with a progname' do
+          expect(logger1).to receive(:log).with(::Logger::INFO, 'message', 'progname')
+          expect(logger2).to receive(:log).with(::Logger::INFO, 'message', 'progname')
+          subject.log ::Logger::INFO, 'message', 'progname'
+        end
+
+        xit 'should be delegated with a block' do
+          block = proc {}
+          block2 = proc {}
+          expect(logger1).to receive(:log).with(::Logger::INFO, nil, nil).and_yield
+          expect(logger2).to receive(:log).with(::Logger::INFO, nil, nil, &block)
+          expect(logger1).to receive(:log).with do|severity, message, progname, &block|
+            binding.pry
+          end
+          subject.log ::Logger::INFO, nil, nil, &block2
         end
       end
     end
