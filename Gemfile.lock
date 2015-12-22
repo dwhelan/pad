@@ -25,7 +25,7 @@ GEM
       simplecov (>= 0.7)
       term-ansicolor (= 1.2.2)
       thor (= 0.18.1)
-    delegate_matcher (0.3)
+    delegate_matcher (0.4)
       proc_extensions (~> 0.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)

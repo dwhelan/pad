@@ -14,8 +14,9 @@ module Pad
         alias_method :services_delegator, :def_service_delegator
       end
 
-      def register(service)
-        services << service
+      def register(*service)
+        @services ||= []
+        @services += service.flatten
       end
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
@@ -24,9 +25,8 @@ module Pad
       end
 
       services_delegator(:<<) { |results| results.compact.inject(:+) }
-      services_delegator(:log, :map, 'severity', 'message = nil', 'progname = nil') { |results| results.compact.inject(:+) }
-
-      private
+      services_delegator(:add, :map, 'severity', 'message = nil', 'progname = nil') { |results| results.any? }
+      services_delegator(:log, :map, 'severity', 'message = nil', 'progname = nil') { |results| results.any? }
 
       def services
         @services ||= []
@@ -34,11 +34,3 @@ module Pad
     end
   end
 end
-
-# TODO: default to standard Ruby logger?
-# TODO: handle progname
-# TODO: handle add
-# TODO: handle log
-# TODO: handle <<
-# TODO: handle close
-# TODO: handle datetime_format

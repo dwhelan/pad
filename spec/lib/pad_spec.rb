@@ -4,7 +4,7 @@ describe Pad do
   subject { Pad }
 
   let(:options)         { { some: :option }  }
-  let(:builder)         { double 'builder'   }
+  let(:builder)         { double('builder').as_null_object }
   let(:default_builder) { Pad.config.builder }
 
   [:model, :entity, :value_object].each do |method|

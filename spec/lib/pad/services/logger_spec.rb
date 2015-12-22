@@ -5,24 +5,29 @@ module Pad
     describe Logger do
       let(:logger1) { double('logger1') }
       let(:logger2) { double('logger2') }
+      let(:loggers) { [logger1, logger2 ] }
 
-      before { subject.register logger1 }
-      before { subject.register logger2 }
+      before { subject.register logger1, logger2 }
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        it "#{method}(message) should be delegated" do
-          expect(logger1).to receive(method).with('message')
-          expect(logger2).to receive(method).with('message')
-          subject.send method, 'message'
+        before do
+          allow(logger1).to receive(method) { true }
+          allow(logger2).to receive(method) { true }
         end
 
-        it "#{method}() should be delegated" do
-          expect(logger1).to receive(method).with(no_args)
-          expect(logger2).to receive(method).with(no_args)
-          subject.send method
+        it "#{method} should be delegated with a message" do
+          expect(subject).to delegate(method).to(*loggers).with('message').and_return true
         end
 
-        it "#{method} should return true if any logger return true" do
+        it "#{method} should be delegated without a message" do
+          expect(subject).to delegate(method).to(*loggers).and_return true
+        end
+
+        it "#{method} should be delegated with a block" do
+          expect(subject).to delegate(method).to(*loggers).with_block.and_return true
+        end
+
+        it "#{method} should return true if any logger returns true" do
           allow(logger1).to receive(method) { true  }
           allow(logger2).to receive(method) { false }
           expect(subject.send(method, 'message')).to be true
@@ -38,59 +43,36 @@ module Pad
           it "#{method}? should return true if any logger return true" do
             allow(logger1).to receive("#{method}?") { true  }
             allow(logger2).to receive("#{method}?") { false }
-            expect(subject.send("#{method}?")).to be true
+            expect(subject).to delegate("#{method}?").to(*loggers).and_return true
           end
 
           it "#{method}? should return false if all loggers return false" do
             allow(logger1).to receive("#{method}?") { false }
             allow(logger2).to receive("#{method}?") { false }
-            expect(subject.send("#{method}?")).to be false
+            expect(subject).to delegate("#{method}?").to(*loggers).and_return false
           end
         end
       end
 
-      describe '<<' do
-        it 'should be delegated' do
-          expect(logger1).to receive(:<<).with('message')
-          expect(logger2).to receive(:<<).with('message')
-          subject << 'message'
-        end
-
-        it 'return the total characters written' do
-          allow(logger1).to receive(:<<).with('message') { 7 }
-          allow(logger2).to receive(:<<).with('message') { 7 }
-          expect(subject << 'message').to eq 14
-        end
+      it '<< should be delegated' do
+        allow(logger1).to receive(:<<) { 7 }
+        allow(logger2).to receive(:<<) { 35 }
+        expect(subject).to delegate(:<<).with('message').to(*loggers).and_return 42
       end
 
-      describe 'log' do
-        it 'should be delegated with only a severity' do
-          expect(logger1).to receive(:log).with(::Logger::INFO)
-          expect(logger2).to receive(:log).with(::Logger::INFO)
-          subject.log ::Logger::INFO
-        end
-
-        it 'should be delegated with a message' do
-          expect(logger1).to receive(:log).with(::Logger::INFO, 'message')
-          expect(logger2).to receive(:log).with(::Logger::INFO, 'message')
-          subject.log ::Logger::INFO, 'message'
-        end
-
-        it 'should be delegated with a progname' do
-          expect(logger1).to receive(:log).with(::Logger::INFO, 'message', 'progname')
-          expect(logger2).to receive(:log).with(::Logger::INFO, 'message', 'progname')
-          subject.log ::Logger::INFO, 'message', 'progname'
-        end
-
-        xit 'should be delegated with a block' do
-          block = proc {}
-          block2 = proc {}
-          expect(logger1).to receive(:log).with(::Logger::INFO, nil, nil).and_yield
-          expect(logger2).to receive(:log).with(::Logger::INFO, nil, nil, &block)
-          expect(logger1).to receive(:log).with do|severity, message, progname, &block|
-            binding.pry
+      [:add, :log].each do |method|
+        describe "#{method}" do
+          before do
+            allow(logger1).to receive(method) { false }
+            allow(logger2).to receive(method) { false }
           end
-          subject.log ::Logger::INFO, nil, nil, &block2
+
+          it { should delegate(method).with(::Logger::INFO).to(*loggers).and_return false }
+          it { should delegate(method).with(::Logger::INFO, 'message').to(*loggers).and_return false }
+          it { should delegate(method).with(::Logger::INFO, 'message', 'progname').to(*loggers).and_return false }
+          it { should delegate(method).with_block.to(*loggers).and_return false }
+
+          it { expect(subject.method(method).arity).to eq -1 }
         end
       end
     end
