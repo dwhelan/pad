@@ -4,91 +4,92 @@ module Pad
   module Services
     describe Registry do
 
-      let(:klass) { Class.new { include Registry } }
+      let(:klass)    { Class.new { include Registry } }
+      let(:services) { [double('service1').as_null_object, double('service2').as_null_object ] }
 
-      describe 'service' do
-        subject { klass.new.method(:call) }
+      subject { klass.new }
 
+      before { subject.register services }
+
+      describe 'argument handling' do
         context 'with no args' do
           before { klass.class_eval { service :call } }
 
-          its(:arity) { should eq 0 }
+          it { should delegate(:call).to(*services) }
         end
 
-        context 'with one arg' do
+        context 'with one required arg' do
           before { klass.class_eval { service :call, :arg } }
 
-          its(:arity) { should eq 1 }
+          it { should delegate(:call).with('arg').to(*services).with_block }
         end
 
-        context 'with many args' do
+        context 'with optional arg' do
+          before { klass.class_eval { service :call, 'arg = :default' } }
+
+          it { should delegate(:call).with().to(*services).with(:default) }
+          it { should delegate(:call).with('value').to(*services).with('value') }
+        end
+
+        context 'with many args as separate values' do
           before { klass.class_eval { service :call, :arg1, :arg2, :arg3} }
 
-          its(:arity) { should eq 3 }
+          it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
         end
 
-        describe 'service delegation' do
-          let(:services) { [double('service1').as_null_object, double('service2').as_null_object ] }
+        context 'with many args in a comma separated string' do
+          before { klass.class_eval { service :call, 'arg1, arg2, arg3' } }
 
-          subject { klass.new }
+          it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
+        end
 
-          before { subject.register services }
+        context 'with many args in a comma separated string' do
+          before { klass.class_eval { service :call, 'arg1=1, arg2=2, arg3=3' } }
 
-          context 'with a block' do
-            before { klass.class_eval { service :call } }
+          it { should delegate(:call).with().to(*services).with(1,2,3) }
+        end
 
-            it { should delegate(:call).to(*services).with_block }
+        context 'with many args in a comma separated string and separately' do
+          before { klass.class_eval { service :call, 'arg1=1', 'arg2=2, arg3=3' } }
+
+          it { should delegate(:call).with().to(*services).with(1,2,3) }
+        end
+
+        context 'with variable args' do
+          before { klass.class_eval { service :call, 'arg1, *args' } }
+
+          it { should delegate(:call).with(1).to(*services) }
+          it { should delegate(:call).with(1, 2, 3).to(*services) }
+        end
+      end
+
+      describe 'delegating blocks' do
+        before { klass.class_eval { service :call } }
+
+        it { should delegate(:call).to(*services).with_block }
+      end
+
+      describe 'return value' do
+
+        it 'with no block should return array of return values from services' do
+          klass.class_eval { service :call }
+          expect(subject.call).to eq services
+        end
+
+        it 'should should pass result to return block' do
+          klass.class_eval do
+            class << self; attr_accessor :result end
+            service(:call) { |result| self.result = result }
           end
 
-          context 'with no args' do
-            before { klass.class_eval { service :call } }
+          subject.call
+          expect(klass.result).to eq services
+        end
 
-            it { should delegate(:call).to(*services) }
-          end
+        it 'with a block should return value from block' do
+          klass.class_eval { service(:call) { :return_value } }
 
-          context 'with one required arg' do
-            before { klass.class_eval { service :call, :arg } }
-
-            it { should delegate(:call).with('arg').to(*services).with_block }
-          end
-
-          context 'with optional arg' do
-            before { klass.class_eval { service :call, 'arg = :default' } }
-
-            it { should delegate(:call).with().to(*services).with(:default) }
-            it { should delegate(:call).with('value').to(*services).with('value') }
-          end
-
-          context 'with many args as separate values' do
-            before { klass.class_eval { service :call, :arg1, :arg2, :arg3} }
-
-            it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
-          end
-
-          context 'with many args in a comma separated string' do
-            before { klass.class_eval { service :call, 'arg1, arg2, arg3' } }
-
-            it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
-          end
-
-          context 'with many args in a comma separated string' do
-            before { klass.class_eval { service :call, 'arg1=1, arg2=2, arg3=3' } }
-
-            it { should delegate(:call).with().to(*services).with(1,2,3) }
-          end
-
-          context 'with many args in a comma separated string and separately' do
-            before { klass.class_eval { service :call, 'arg1=1', 'arg2=2, arg3=3' } }
-
-            it { should delegate(:call).with().to(*services).with(1,2,3) }
-          end
-
-          context 'with variable args' do
-            before { klass.class_eval { service :call, 'arg1, *args' } }
-
-            it { should delegate(:call).with(1).to(*services) }
-            it { should delegate(:call).with(1, 2, 3).to(*services) }
-          end
+          expect(subject.call).to eq :return_value
         end
       end
     end

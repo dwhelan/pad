@@ -22,17 +22,29 @@ module Pad
       end
 
       module ClassMethods
-        def service(method, *args, &return_block)
+        def service(method_name, *args, &rblock)
           options = extract_options(*args)
-          return_block ||= :any?.to_proc
+          #|| :any?.to_proc
 
-          method = <<-END.gsub(/^ {6}/, '')
-            def #{method}(#{arg_declaration(args)} &block)
-              services.map { |service| service.#{method}(#{arg_names(args)} &block) }
+          return_blocks[method_name.to_sym] = rblock
+
+          line = __LINE__ + 2
+          method_source = <<-METHOD
+            def #{method_name}(#{arg_declaration(args)} &block)
+              result = services.map { |service| service.#{method_name}(#{arg_names(args)} &block) }
+              self.class.return_block(:#{method_name}).call(result)
             end
-          END
-          # binding.pry
-          module_eval method
+          METHOD
+
+          module_eval method_source, __FILE__, line
+        end
+
+        def return_blocks
+          @return_blocks ||= {}
+        end
+
+        def return_block(method)
+          return_blocks[method] || proc {|result| result }
         end
 
         private
