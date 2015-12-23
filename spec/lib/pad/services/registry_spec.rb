@@ -71,12 +71,12 @@ module Pad
 
       describe 'return value' do
 
-        it 'with no block should return array of return values from services' do
+        it 'with no result block should return array of return values from services' do
           klass.class_eval { service :call }
           expect(subject.call).to eq services
         end
 
-        it 'should should pass result to return block' do
+        it 'should should pass result to result block' do
           klass.class_eval do
             class << self; attr_accessor :result end
             service(:call) { |result| self.result = result }
@@ -86,7 +86,7 @@ module Pad
           expect(klass.result).to eq services
         end
 
-        it 'with a block should return value from block' do
+        it 'with a result block should return value from the result block' do
           klass.class_eval { service(:call) { :return_value } }
 
           expect(subject.call).to eq :return_value

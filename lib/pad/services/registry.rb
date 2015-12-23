@@ -26,13 +26,13 @@ module Pad
           options = extract_options(*args)
           #|| :any?.to_proc
 
-          return_blocks[method_name.to_sym] = rblock
+          result_blocks[method_name.to_sym] = rblock
 
           line = __LINE__ + 2
           method_source = <<-METHOD
             def #{method_name}(#{arg_declaration(args)} &block)
               result = services.map { |service| service.#{method_name}(#{arg_names(args)} &block) }
-              result_block = self.class.return_blocks[:#{method_name}]
+              result_block = self.class.result_blocks[:#{method_name}]
               result_block ? result_block.call(result) : result
             end
           METHOD
@@ -40,7 +40,7 @@ module Pad
           module_eval method_source, __FILE__, line
         end
 
-        def return_blocks
+        def result_blocks
           @return_blocks ||= {}
         end
 
