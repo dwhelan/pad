@@ -3,9 +3,8 @@ require 'spec_helper'
 module Pad
   module Services
     describe Registry do
-
       let(:klass)    { Class.new { include Registry } }
-      let(:services) { [double('service1').as_null_object, double('service2').as_null_object ] }
+      let(:services) { [double('service1').as_null_object, double('service2').as_null_object] }
 
       subject { klass.new }
 
@@ -27,12 +26,13 @@ module Pad
         context 'with optional arg' do
           before { klass.class_eval { service :call, 'arg = :default' } }
 
+          # rubocop: disable Style/MethodCallParentheses
           it { should delegate(:call).with().to(*services).with(:default) }
           it { should delegate(:call).with('value').to(*services).with('value') }
         end
 
         context 'with many args as separate values' do
-          before { klass.class_eval { service :call, :arg1, :arg2, :arg3} }
+          before { klass.class_eval { service :call, :arg1, :arg2, :arg3 } }
 
           it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
         end
@@ -46,13 +46,13 @@ module Pad
         context 'with many args in a comma separated string' do
           before { klass.class_eval { service :call, 'arg1=1, arg2=2, arg3=3' } }
 
-          it { should delegate(:call).with().to(*services).with(1,2,3) }
+          it { should delegate(:call).with().to(*services).with(1, 2, 3) }
         end
 
         context 'with many args in a comma separated string and separately' do
           before { klass.class_eval { service :call, 'arg1=1', 'arg2=2, arg3=3' } }
 
-          it { should delegate(:call).with().to(*services).with(1,2,3) }
+          it { should delegate(:call).with().to(*services).with(1, 2, 3) }
         end
 
         context 'with variable args' do
@@ -63,15 +63,26 @@ module Pad
         end
       end
 
-      describe 'delegating blocks' do
+      describe 'blocks' do
         before { klass.class_eval { service :call } }
 
         it { should delegate(:call).to(*services).with_block }
       end
 
-      describe 'return value' do
+      describe 'enumerable method' do
+        it 'should default to "map"' do
+          klass.class_eval { service :call }
+          should delegate(:call).to(:services).as(:map)
+        end
 
-        it 'with no result block should return array of return values from services' do
+        it 'should allow enumerable method to be provided' do
+          klass.class_eval { service :call, enumerable: :each }
+          should delegate(:call).to(:services).as(:each)
+        end
+      end
+
+      describe 'return value' do
+        it 'with no result block should return array of result values from services' do
           klass.class_eval { service :call }
           expect(subject.call).to eq services
         end
@@ -88,7 +99,6 @@ module Pad
 
         it 'with a result block should return value from the result block' do
           klass.class_eval { service(:call) { :return_value } }
-
           expect(subject.call).to eq :return_value
         end
       end

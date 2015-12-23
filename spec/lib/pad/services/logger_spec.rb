@@ -5,7 +5,7 @@ module Pad
     describe Logger do
       let(:logger1) { double('logger1') }
       let(:logger2) { double('logger2') }
-      let(:loggers) { [logger1, logger2 ] }
+      let(:loggers) { [logger1, logger2] }
 
       before { subject.register logger1, logger2 }
 
@@ -39,18 +39,18 @@ module Pad
           expect(subject.send(method, 'message')).to be false
         end
 
-        unless method == :unknown
-          it "#{method}? should return true if any logger return true" do
-            allow(logger1).to receive("#{method}?") { true  }
-            allow(logger2).to receive("#{method}?") { false }
-            expect(subject).to delegate("#{method}?").to(*loggers).and_return true
-          end
+        next if method == :unknown
 
-          it "#{method}? should return false if all loggers return false" do
-            allow(logger1).to receive("#{method}?") { false }
-            allow(logger2).to receive("#{method}?") { false }
-            expect(subject).to delegate("#{method}?").to(*loggers).and_return false
-          end
+        it "#{method}? should return true if any logger return true" do
+          allow(logger1).to receive("#{method}?") { true  }
+          allow(logger2).to receive("#{method}?") { false }
+          expect(subject).to delegate("#{method}?").to(*loggers).and_return true
+        end
+
+        it "#{method}? should return false if all loggers return false" do
+          allow(logger1).to receive("#{method}?") { false }
+          allow(logger2).to receive("#{method}?") { false }
+          expect(subject).to delegate("#{method}?").to(*loggers).and_return false
         end
       end
 
@@ -72,7 +72,7 @@ module Pad
           it { should delegate(method).with(::Logger::INFO, 'message', 'progname').to(*loggers).and_return false }
           it { should delegate(method).with_block.to(*loggers).and_return false }
 
-          it { expect(subject.method(method).arity).to eq -1 }
+          it { expect(subject.method(method).arity).to eq(-1) }
         end
       end
     end

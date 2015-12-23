@@ -23,15 +23,14 @@ module Pad
 
       module ClassMethods
         def service(method_name, *args, &rblock)
-          options = extract_options(*args)
-          #|| :any?.to_proc
+          options = extract_options(args)
 
           result_blocks[method_name.to_sym] = rblock
 
           line = __LINE__ + 2
           method_source = <<-METHOD
             def #{method_name}(#{arg_declaration(args)} &block)
-              result = services.map { |service| service.#{method_name}(#{arg_names(args)} &block) }
+              result = services.#{options[:enumerable]} { |service| service.#{method_name}(#{arg_names(args)} &block) }
               result_block = self.class.result_blocks[:#{method_name}]
               result_block ? result_block.call(result) : result
             end
@@ -58,8 +57,8 @@ module Pad
           args.map { |arg| arg.to_s.split(',') }.flatten.map(&:strip)
         end
 
-        def extract_options(*args)
-          defaults = {composite_method: :map}
+        def extract_options(args)
+          defaults = { enumerable: :map }
           args.last.is_a?(Hash) ? defaults.merge(args.pop) : defaults
         end
       end

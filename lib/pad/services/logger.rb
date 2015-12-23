@@ -8,8 +8,8 @@ module Pad
           options = extract_options(*args)
           return_block ||= :any?.to_proc
 
-          define_method method do |*args, &block|
-            result = services.send(options[:composite_method]) { |service| service.send(method, *args, &block) }
+          define_method method do |*a, &block|
+            result = services.send(options[:composite_method]) { |service| service.send(method, *a, &block) }
             return_block ? return_block.call(result) : result
           end
         end
@@ -17,7 +17,7 @@ module Pad
         private
 
         def extract_options(*args)
-          defaults = {composite_method: :map}
+          defaults = { composite_method: :map }
           args.last.is_a?(Hash) ? defaults.merge(args.pop) : defaults
         end
       end

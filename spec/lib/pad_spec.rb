@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Pad do
   subject { Pad }
 
-  let(:options)         { { some: :option }  }
+  let(:options)         { { some: :option } }
   let(:builder)         { double('builder').as_null_object }
   let(:default_builder) { Pad.config.builder }
 
