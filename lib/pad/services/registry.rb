@@ -32,7 +32,8 @@ module Pad
           method_source = <<-METHOD
             def #{method_name}(#{arg_declaration(args)} &block)
               result = services.map { |service| service.#{method_name}(#{arg_names(args)} &block) }
-              self.class.return_block(:#{method_name}).call(result)
+              result_block = self.class.return_blocks[:#{method_name}]
+              result_block ? result_block.call(result) : result
             end
           METHOD
 
@@ -41,10 +42,6 @@ module Pad
 
         def return_blocks
           @return_blocks ||= {}
-        end
-
-        def return_block(method)
-          return_blocks[method] || proc {|result| result }
         end
 
         private
