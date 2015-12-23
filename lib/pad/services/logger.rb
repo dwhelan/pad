@@ -4,33 +4,46 @@ module Pad
   module Services
     class Logger
       class << self
-        def def_service_delegator(method, composite_method = :map, *args, &block)
-          define_method method do |*args, &b|
-            result = services.send(composite_method) { |service| service.send(method, *args, &b) }
-            block ? block.call(result) : result
+        def service(method, *args, &return_block)
+          options = extract_options(*args)
+          return_block ||= :any?.to_proc
+
+          define_method method do |*args, &block|
+            result = services.send(options[:composite_method]) { |service| service.send(method, *args, &block) }
+            return_block ? return_block.call(result) : result
           end
         end
 
-        alias_method :services_delegator, :def_service_delegator
+        private
+
+        def extract_options(*args)
+          defaults = {composite_method: :map}
+          args.last.is_a?(Hash) ? defaults.merge(args.pop) : defaults
+        end
       end
 
-      def register(*service)
+      def register(*services)
         @services ||= []
-        @services += service.flatten
+        @services += services.flatten
       end
-
-      [:debug, :info, :warn, :error, :fatal, :unknown].each do |method|
-        services_delegator(method, :map, 'message=nil') { |results| results.any? }
-        services_delegator("#{method}?")                { |results| results.any? } unless method == :unknown
-      end
-
-      services_delegator(:<<) { |results| results.compact.inject(:+) }
-      services_delegator(:add, :map, 'severity', 'message = nil', 'progname = nil') { |results| results.any? }
-      services_delegator(:log, :map, 'severity', 'message = nil', 'progname = nil') { |results| results.any? }
 
       def services
         @services ||= []
       end
+
+      [:debug, :info, :warn, :error, :fatal].each do |severity|
+        service severity, 'message=nil'
+        service "#{severity}?"
+      end
+
+      service :unknown, 'message=nil'
+
+      service :<< do |results|
+        results.compact.inject(:+)
+      end
+
+      service :add, 'severity, message = nil, progname = nil'
+      service :log, 'severity, message = nil, progname = nil'
     end
   end
 end

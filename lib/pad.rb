@@ -4,6 +4,7 @@ require 'pad/configuration'
 require 'pad/version'
 require 'pad/entity'
 
+require 'pad/services/registry'
 require 'pad/services/logger'
 
 module Pad
