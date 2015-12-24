@@ -24,19 +24,15 @@ module Pad
       module ClassMethods
         def service(method_name, *args, &rblock)
           options = extract_options(args)
-
           result_blocks[method_name.to_sym] = rblock
 
-          line = __LINE__ + 2
-          method_source = <<-METHOD
+          module_eval <<-METHOD, __FILE__, __LINE__ + 1
             def #{method_name}(#{arg_declaration(args)} &block)
               result = services.#{options[:enumerable]} { |service| service.#{method_name}(#{arg_names(args)} &block) }
               result_block = self.class.result_blocks[:#{method_name}]
               result_block ? result_block.call(result) : result
             end
           METHOD
-
-          module_eval method_source, __FILE__, line
         end
 
         def result_blocks
