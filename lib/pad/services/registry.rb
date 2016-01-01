@@ -16,7 +16,7 @@ module Pad
           define_method method_name do |*args, &block|
             accessor = __send__(accessor_name)
             result   = accessor.__send__(accesor_method_name) { |service| service.__send__(method_name, *args, &block) }
-            return_block ? return_block.call(result) : result
+            return_block ? instance_exec(result, &return_block) : result
           end
         end
       end

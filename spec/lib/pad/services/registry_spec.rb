@@ -11,39 +11,22 @@ module Pad
       before { subject.delegates = delegates }
       before { klass.class_eval { service :delegates, :call } }
 
-      describe 'argument handling' do
-        context 'with no args' do
-          it { should delegate(:call).to(*delegates) }
-        end
-
-        context 'with one required arg' do
-          it { should delegate(:call).with('arg').to(*delegates).with_block }
-        end
-
-        context 'with many args as separate values' do
-          it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*delegates) }
-        end
-
-        context 'with many args in a comma separated string' do
-          it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*delegates) }
-        end
-
-        context 'with variable args' do
-          it { should delegate(:call).with(1).to(*delegates) }
-          it { should delegate(:call).with(1, 2, 3).to(*delegates) }
-        end
+      describe 'arguments' do
+        it { should delegate(:call).to(*delegates) }
+        it { should delegate(:call).with('arg').to(*delegates) }
+        it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*delegates) }
       end
 
       describe 'blocks' do
         it { should delegate(:call).to(*delegates).with_block }
       end
 
-      describe 'enumerable method' do
+      describe 'accessor method' do
         it 'should default to "map"' do
           should delegate(:call).to(:delegates).as(:map)
         end
 
-        it 'should allow enumerable method to be provided' do
+        it 'should allow accessor method to be provided' do
           klass.class_eval { service :delegates, :call, enumerable: :each }
           should delegate(:call).to(:delegates).as(:each)
         end
@@ -54,17 +37,23 @@ module Pad
           expect(subject.call).to eq delegates
         end
 
-        it 'should should pass result to result block' do
-          klass.class_eval do
-            class << self; attr_accessor :result end
-            service(:delegates, :call) { |result| self.result = result }
-          end
+        it 'should should set self to the delegator in the result block' do
+          block_self = nil
+          klass.class_eval { service(:delegates, :call) { block_self = self } }
 
           subject.call
-          expect(klass.result).to eq delegates
+          expect(block_self).to be subject
         end
 
-        it 'with a result block should return value from the result block' do
+        it 'should should pass delegate results to the result block' do
+          block_result = nil
+          klass.class_eval { service(:delegates, :call) { |result| block_result= result } }
+
+          subject.call
+          expect(block_result).to eq delegates
+        end
+
+        it 'should return value from the result block' do
           klass.class_eval { service(:delegates, :call) { :return_value } }
           expect(subject.call).to eq :return_value
         end
