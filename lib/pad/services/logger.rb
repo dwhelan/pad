@@ -17,7 +17,7 @@ module Pad
         service name, &:any?
       end
 
-      service(:<<) { |results| results.compact.inject(:+) }
+      service :<<, &:first
     end
   end
 end

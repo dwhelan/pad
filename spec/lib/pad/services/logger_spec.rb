@@ -57,7 +57,7 @@ module Pad
       it '<< should be delegated' do
         allow(logger1).to receive(:<<) { 7 }
         allow(logger2).to receive(:<<) { 35 }
-        expect(subject).to delegate(:<<).with('message').to(*loggers).and_return 42
+        expect(subject).to delegate(:<<).with('message').to(*loggers).and_return 7
       end
 
       [:add, :log].each do |method|

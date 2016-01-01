@@ -36,3 +36,5 @@ module Pad
 end
 
 # TODO: remove __FILE__ from backtrace
+# TODO: extend Forwardable with this?
+# TODO: extend ActiveSupport delegate with this?
