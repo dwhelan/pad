@@ -6,7 +6,7 @@ module Pad
       include Registry
 
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |name|
-        service name, 'message=nil', &:any?
+        service name, &:any?
 
         next if name == :unknown
 
@@ -14,10 +14,10 @@ module Pad
       end
 
       [:add, :log].each do |name|
-        service name, 'severity, message = nil, progname = nil', &:any?
+        service name, &:any?
       end
 
-      service(:<<, 'message') { |results| results.compact.inject(:+) }
+      service(:<<) { |results| results.compact.inject(:+) }
     end
   end
 end

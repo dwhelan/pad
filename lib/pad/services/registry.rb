@@ -22,29 +22,17 @@ module Pad
       end
 
       module ClassMethods
-        def service(method_name, *args, &rblock)
-          options = extract_options(args)
+        def service(method_name, options = {}, &return_block)
+          enumerable_method_name = options.fetch(:enumerable, :map)
 
           define_method method_name do |*args, &block|
-            result = services.__send__(options[:enumerable]) { |service| service.__send__(method_name, *args, &block) }
-            rblock ? rblock.call(result) : result
+            result = services.__send__(enumerable_method_name) { |service| service.__send__(method_name, *args, &block) }
+            return_block ? return_block.call(result) : result
           end
-        end
-
-        def result_blocks
-          @return_blocks ||= {}
-        end
-
-        private
-
-        def extract_options(args)
-          defaults = { enumerable: :map }
-          args.last.is_a?(Hash) ? defaults.merge(args.pop) : defaults
         end
       end
     end
   end
 end
 
-# TODO: dont' declare method parameters
 # TODO: remove __FILE__ from backtrace

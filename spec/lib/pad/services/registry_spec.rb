@@ -18,7 +18,7 @@ module Pad
         end
 
         context 'with one required arg' do
-          before { klass.class_eval { service :call, :arg } }
+          before { klass.class_eval { service :call } }
 
           it { should delegate(:call).with('arg').to(*services).with_block }
         end
@@ -30,13 +30,13 @@ module Pad
         end
 
         context 'with many args in a comma separated string' do
-          before { klass.class_eval { service :call, 'arg1, arg2, arg3' } }
+          before { klass.class_eval { service :call } }
 
           it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
         end
 
         context 'with variable args' do
-          before { klass.class_eval { service :call, 'arg1, *args' } }
+          before { klass.class_eval { service :call } }
 
           it { should delegate(:call).with(1).to(*services) }
           it { should delegate(:call).with(1, 2, 3).to(*services) }
