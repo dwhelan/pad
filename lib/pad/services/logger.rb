@@ -5,18 +5,16 @@ module Pad
     class Logger
       include Registry
 
-      any = ->(results) { results.any? }
-
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |name|
-        service name, 'message=nil', &any
+        service name, 'message=nil', &:any?
 
         next if name == :unknown
 
-        service "#{name}?", &any
+        service "#{name}?", &:any?
       end
 
       [:add, :log].each do |name|
-        service name, 'severity, message = nil, progname = nil', &any
+        service name, 'severity, message = nil, progname = nil', &:any?
       end
 
       service(:<<, 'message') { |results| results.compact.inject(:+) }

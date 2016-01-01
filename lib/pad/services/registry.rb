@@ -61,3 +61,6 @@ module Pad
     end
   end
 end
+
+# TODO: dont' declare method parameters
+# TODO: remove __FILE__ from backtrace
