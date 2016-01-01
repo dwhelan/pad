@@ -5,19 +5,28 @@ module Pad
     class Logger
       include Registry
 
+      def register(*services)
+        @services ||= []
+        @services += services.flatten
+      end
+
+      def services
+        @services ||= []
+      end
+
       [:debug, :info, :warn, :error, :fatal, :unknown].each do |name|
-        service name, &:any?
+        service :services, name, &:any?
 
         next if name == :unknown
 
-        service "#{name}?", &:any?
+        service :services, "#{name}?", &:any?
       end
 
       [:add, :log].each do |name|
-        service name, &:any?
+        service :services, name, &:any?
       end
 
-      service :<<, &:first
+      service :services, :<<, &:first
     end
   end
 end
