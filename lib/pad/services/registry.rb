@@ -24,15 +24,11 @@ module Pad
       module ClassMethods
         def service(method_name, *args, &rblock)
           options = extract_options(args)
-          result_blocks[method_name.to_sym] = rblock
 
-          module_eval <<-METHOD, __FILE__, __LINE__ + 1
-            def #{method_name}(#{arg_declaration(args)} &block)
-              result = services.#{options[:enumerable]} { |service| service.#{method_name}(#{arg_names(args)} &block) }
-              result_block = self.class.result_blocks[:#{method_name}]
-              result_block ? result_block.call(result) : result
-            end
-          METHOD
+          define_method method_name do |*args, &block|
+            result = services.__send__(options[:enumerable]) { |service| service.__send__(method_name, *args, &block) }
+            rblock ? rblock.call(result) : result
+          end
         end
 
         def result_blocks
@@ -40,18 +36,6 @@ module Pad
         end
 
         private
-
-        def arg_declaration(args)
-          args.empty? ? '' : args.join(', ') + ','
-        end
-
-        def arg_names(args)
-          args.empty? ? '' : extract_args(args).map { |arg| arg.to_s.split('=').first.strip }.join(', ') + ','
-        end
-
-        def extract_args(args)
-          args.map { |arg| arg.to_s.split(',') }.flatten.map(&:strip)
-        end
 
         def extract_options(args)
           defaults = { enumerable: :map }

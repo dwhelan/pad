@@ -67,9 +67,9 @@ module Pad
             allow(logger2).to receive(method) { false }
           end
 
-          it { should delegate(method).with(::Logger::INFO).to(*loggers).with(::Logger::INFO, nil, nil).with_block.and_return false }
-          it { should delegate(method).with(::Logger::INFO, 'message').to(*loggers).with(::Logger::INFO, 'message', nil).and_return false }
-          it { should delegate(method).with(::Logger::INFO, 'message', 'progname').to(*loggers).with(::Logger::INFO, 'message', 'progname').and_return false }
+          it { should delegate(method).with(::Logger::INFO).to(*loggers).with_block.and_return false }
+          it { should delegate(method).with(::Logger::INFO, 'message').to(*loggers).and_return false }
+          it { should delegate(method).with(::Logger::INFO, 'message', 'progname').to(*loggers).and_return false }
         end
       end
     end

@@ -23,16 +23,8 @@ module Pad
           it { should delegate(:call).with('arg').to(*services).with_block }
         end
 
-        context 'with optional arg' do
-          before { klass.class_eval { service :call, 'arg = :default' } }
-
-          # rubocop: disable Style/MethodCallParentheses
-          it { should delegate(:call).with().to(*services).with(:default) }
-          it { should delegate(:call).with('value').to(*services).with('value') }
-        end
-
         context 'with many args as separate values' do
-          before { klass.class_eval { service :call, :arg1, :arg2, :arg3 } }
+          before { klass.class_eval { service :call } }
 
           it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
         end
@@ -41,18 +33,6 @@ module Pad
           before { klass.class_eval { service :call, 'arg1, arg2, arg3' } }
 
           it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*services) }
-        end
-
-        context 'with many args in a comma separated string' do
-          before { klass.class_eval { service :call, 'arg1=1, arg2=2, arg3=3' } }
-
-          it { should delegate(:call).with().to(*services).with(1, 2, 3) }
-        end
-
-        context 'with many args in a comma separated string and separately' do
-          before { klass.class_eval { service :call, 'arg1=1', 'arg2=2, arg3=3' } }
-
-          it { should delegate(:call).with().to(*services).with(1, 2, 3) }
         end
 
         context 'with variable args' do
