@@ -7,26 +7,17 @@ module Pad
 
       def register(*services)
         @services ||= []
-        @services += services.flatten
+        @services.concat(services)
       end
 
       def services
         @services ||= []
       end
 
-      [:debug, :info, :warn, :error, :fatal, :unknown].each do |name|
-        service :services, name, &:any?
-
-        next if name == :unknown
-
-        service :services, "#{name}?", &:any?
-      end
-
-      [:add, :log].each do |name|
-        service :services, name, &:any?
-      end
-
-      service :services, :<<, &:first
+      delegate_via :services, :debug,  :info,  :warn,  :error,  :fatal,  :unknown, &:any?
+      delegate_via :services, :debug?, :info?, :warn?, :error?, :fatal?, &:any?
+      delegate_via :services, :add, :log, &:any?
+      delegate_via :services, :<<, &:first
     end
   end
 end

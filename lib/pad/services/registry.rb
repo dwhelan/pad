@@ -10,13 +10,16 @@ module Pad
       end
 
       module ClassMethods
-        def service(accessor_name, method_name, options = {}, &return_block)
-          accesor_method_name = options.fetch(:enumerable, :map)
+        def delegate_via(accessor_name, *method_names, &return_block)
+          options         = method_names.last.is_a?(Hash) ? method_names.pop : {}
+          via_method_name = options.fetch(:via, :map)
 
-          define_method method_name do |*args, &block|
-            accessor = __send__(accessor_name)
-            result   = accessor.__send__(accesor_method_name) { |service| service.__send__(method_name, *args, &block) }
-            return_block ? instance_exec(result, &return_block) : result
+          method_names.each do |method_name|
+            define_method method_name do |*args, &block|
+              accessor = __send__(accessor_name)
+              result   = accessor.__send__(via_method_name) { |service| service.__send__(method_name, *args, &block) }
+              return_block ? instance_exec(result, &return_block) : result
+            end
           end
         end
       end
