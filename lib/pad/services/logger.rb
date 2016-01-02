@@ -3,11 +3,10 @@ require 'logger'
 module Pad
   module Services
     class Logger
-      include Registry
+      include DelegateVia
 
-      def register(*services)
-        @services ||= []
-        @services.concat(services)
+      def register(*loggers)
+        services.concat(loggers)
       end
 
       def services

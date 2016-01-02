@@ -1,10 +1,12 @@
 require 'pad/virtus'
 
+# TODO: Move to separate gem
+require 'pad/delegate_via'
+
 require 'pad/configuration'
 require 'pad/version'
 require 'pad/entity'
 
-require 'pad/services/registry'
 require 'pad/services/logger'
 
 module Pad
