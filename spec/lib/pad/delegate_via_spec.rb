@@ -9,19 +9,16 @@ describe DelegateVia do
   before { subject.delegates = delegates }
   before { klass.class_eval { delegate_via :delegates, :call } }
 
-  describe 'single method' do
-    it { should delegate(:call).to(*delegates) }
-  end
-
-  describe 'multiple methods' do
-    before { klass.class_eval { delegate_via :delegates, :call2 } }
-    it { should delegate(:call).to(*delegates) }
-    it { should delegate(:call2).to(*delegates) }
-  end
-
-  describe 'arguments' do
+  describe 'with arguments' do
+    it { should delegate(:call).with.to(*delegates) }
     it { should delegate(:call).with('arg').to(*delegates) }
-    it { should delegate(:call).with('arg', 'arg2', 'arg3').to(*delegates) }
+    it { should delegate(:call).with('arg', 'arg2').to(*delegates) }
+  end
+
+  describe 'with multiple methods' do
+    before { klass.class_eval { delegate_via :delegates, :call2, :call3 } }
+    it { should delegate(:call2).to(*delegates) }
+    it { should delegate(:call3).to(*delegates) }
   end
 
   describe 'blocks' do
@@ -63,6 +60,17 @@ describe DelegateVia do
     it 'should return value from the result block' do
       klass.class_eval { delegate_via(:delegates, :call) { :return_value } }
       expect(subject.call).to eq :return_value
+    end
+  end
+
+  describe 'to_s' do
+    it 'with a single delegation' do
+      expect(klass.ancestors[1].to_s).to eq 'DelegateVia(call)'
+    end
+
+    it 'with multiple delegations' do
+      klass.class_eval { delegate_via :delegates, :call2, :call3 }
+      expect(klass.ancestors[1].to_s).to eq 'DelegateVia(call, call2, call3)'
     end
   end
 end
